@@ -55,6 +55,21 @@ export class ForbiddenError extends Error {
 }
 
 /**
+ * The plan doesn't allow this: trial over, subscription lapsed, a
+ * feature outside the plan, or a plan limit reached. `code` lets the
+ * UI tell those apart (see src/lib/billing/server.ts).
+ */
+export class PaymentRequiredError extends Error {
+  readonly status = 402 as const;
+  readonly code: string;
+  constructor(message: string, code: string) {
+    super(message);
+    this.name = "PaymentRequiredError";
+    this.code = code;
+  }
+}
+
+/**
  * Convert one of the typed errors above (or anything else) into a
  * `NextResponse`. Routes can do:
  *
@@ -69,6 +84,12 @@ export class ForbiddenError extends Error {
 export function toErrorResponse(err: unknown): NextResponse {
   if (err instanceof UnauthorizedError || err instanceof ForbiddenError) {
     return NextResponse.json({ error: err.message }, { status: err.status });
+  }
+  if (err instanceof PaymentRequiredError) {
+    return NextResponse.json(
+      { error: err.message, code: err.code },
+      { status: err.status },
+    );
   }
   console.error("[toErrorResponse] uncategorized error:", err);
   return NextResponse.json({ error: "Internal server error" }, { status: 500 });

@@ -1681,7 +1681,8 @@
       "fields": "필드 & 태그",
       "deals": "딜 & 통화",
       "members": "팀원",
-      "api": "API 키"
+      "api": "API 키",
+      "billing": "결제 및 요금제"
     },
     "groups": {
       "account": "계정",
@@ -2061,5 +2062,74 @@
   },
   "DashboardShell": {
     "loading": "불러오는 중..."
+  },
+  "Billing": {
+    "title": "결제 및 요금제",
+    "desc": "Atira CRM 요금제입니다. WhatsApp 대화 요금은 Meta가 WhatsApp 비즈니스 계정으로 직접 청구합니다.",
+    "loading": "결제 정보를 불러오는 중...",
+    "loadFailed": "결제 정보를 불러오지 못했습니다",
+    "networkError": "네트워크 오류입니다. 다시 시도해 주세요.",
+    "currentPlan": "현재 요금제",
+    "status": {
+      "trialing": "무료 체험",
+      "active": "활성",
+      "past_due": "결제 대기",
+      "halted": "결제 실패",
+      "cancelled": "취소됨"
+    },
+    "monthly": "월간",
+    "yearly": "연간",
+    "yearlySave": "2개월 무료",
+    "cycleLabel": "결제 주기",
+    "perMonth": "/월",
+    "perYear": "/년",
+    "gstNote": "가격은 INR 기준이며 GST 별도입니다.",
+    "trialEndsIn": "{days, plural, =0 {무료 체험이 종료되었습니다} other {무료 체험이 #일 후 종료됩니다}}",
+    "renewsOn": "{date}에 갱신",
+    "endsOn": "{date}에 종료",
+    "endedOn": "{date}에 종료됨",
+    "pastDueHint": "Razorpay가 마지막 결제를 처리하지 못해 다시 시도합니다. 중단을 피하려면 Razorpay 이메일에서 결제 수단을 업데이트하세요.",
+    "haltedHint": "결제에 실패하여 요금제가 중지되었습니다. 계속하려면 요금제를 선택하세요.",
+    "usage": {
+      "members": "팀원: {used} / {limit}",
+      "membersUnlimited": "팀원: {used} (무제한)",
+      "automations": "자동화: {used} / {limit}",
+      "automationsUnlimited": "자동화: {used} (무제한)"
+    },
+    "features": {
+      "members": "{count, plural, other {팀원 #명}}",
+      "membersUnlimited": "팀원 무제한",
+      "automations": "{count, plural, other {자동화 #개}}",
+      "automationsUnlimited": "자동화 무제한",
+      "ai": "AI 답장 및 지식 베이스",
+      "flows": "챗봇 플로우",
+      "api": "REST API 및 웹훅"
+    },
+    "choose": "요금제 선택",
+    "switch": "이 요금제로 변경",
+    "current": "현재 요금제",
+    "notAvailable": "아직 이용할 수 없음",
+    "adminOnly": "관리자와 소유자만 요금제를 변경할 수 있습니다.",
+    "checkoutDisabled": "이 서버에는 아직 온라인 결제가 설정되지 않았습니다.",
+    "redirecting": "Razorpay를 여는 중...",
+    "changed": "요금제 변경을 요청했습니다. Razorpay가 확인하면 여기에 표시됩니다.",
+    "subscribeFailed": "결제를 시작하지 못했습니다",
+    "cancel": "요금제 취소",
+    "cancelTitle": "요금제를 취소할까요?",
+    "cancelBody": "요금제는 {date}까지 유지됩니다. 그 이후에는 다시 요금제를 선택할 때까지 메시지 전송, 브로드캐스트, 자동화, AI 답장이 중지됩니다. 데이터는 보존됩니다.",
+    "cancelConfirm": "요금제 취소",
+    "keep": "요금제 유지",
+    "cancelled": "요금제가 {date}에 종료됩니다.",
+    "cancelFailed": "요금제를 취소하지 못했습니다"
+  },
+  "BillingBanner": {
+    "trialEnding": "{days, plural, other {무료 체험이 #일 후 종료됩니다}}",
+    "trialEndingBody": "인박스, 브로드캐스트, 자동화를 계속 사용하려면 요금제를 선택하세요.",
+    "trialEndedTitle": "무료 체험이 종료되었습니다",
+    "inactiveTitle": "워크스페이스가 일시 중지되었습니다",
+    "inactiveBody": "요금제를 선택할 때까지 메시지 전송, 브로드캐스트, 자동화, 챗봇 플로우, AI 답장이 일시 중지됩니다. 고객이 보낸 메시지는 계속 저장됩니다.",
+    "pastDueTitle": "결제 실패",
+    "pastDueBody": "Razorpay가 결제를 다시 시도합니다. 중단을 피하려면 결제 수단을 업데이트하세요.",
+    "choosePlan": "요금제 선택"
   }
 }

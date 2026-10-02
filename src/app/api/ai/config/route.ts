@@ -4,6 +4,7 @@ import {
   requireRole,
   toErrorResponse,
 } from '@/lib/auth/account'
+import { requireFeature } from '@/lib/billing/server'
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit'
 import { encrypt, decrypt } from '@/lib/whatsapp/encryption'
 import { validateAiCredentials } from '@/lib/ai/validate'
@@ -70,6 +71,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const { supabase, accountId, userId } = await requireRole('admin')
+    await requireFeature({ supabase, accountId }, 'ai')
 
     const limit = checkRateLimit(`ai-config:${userId}`, RATE_LIMITS.adminAction)
     if (!limit.success) return rateLimitResponse(limit)

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { requireRole, toErrorResponse } from '@/lib/auth/account'
+import { requireFeature } from '@/lib/billing/server'
 import { supabaseAdmin } from '@/lib/flows/admin-client'
 import { validateFlowForActivation } from '@/lib/flows/validate'
 
@@ -28,8 +29,9 @@ export async function POST(
   // flows_update policy requires `agent`, but the service-role client
   // below bypasses RLS, so enforce the role here (a viewer passes the
   // membership-only ownership check).
+  let ctx: Awaited<ReturnType<typeof requireRole>>
   try {
-    await requireRole('agent')
+    ctx = await requireRole('agent')
   } catch (err) {
     return toErrorResponse(err)
   }
@@ -51,6 +53,16 @@ export async function POST(
       { error: "status must be one of 'draft' | 'active' | 'archived'" },
       { status: 400 },
     )
+  }
+
+  // Drafting and archiving stay allowed on any plan so a downgraded
+  // workspace can still switch flows off; only going live is gated.
+  if (status === 'active') {
+    try {
+      await requireFeature(ctx, 'flows')
+    } catch (err) {
+      return toErrorResponse(err)
+    }
   }
 
   // Ownership via RLS — caller's client.

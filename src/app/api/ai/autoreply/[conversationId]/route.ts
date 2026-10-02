@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireRole, toErrorResponse } from '@/lib/auth/account'
+import { requireFeature } from '@/lib/billing/server'
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit'
 
 type Params = { params: Promise<{ conversationId: string }> }
@@ -27,6 +28,7 @@ type Params = { params: Promise<{ conversationId: string }> }
 export async function POST(request: Request, { params }: Params) {
   try {
     const { supabase, accountId, userId } = await requireRole('agent')
+    await requireFeature({ supabase, accountId }, 'ai')
 
     // Reuse the send bucket: this is a cheap per-user inbox action and
     // toggling it in a tight loop has no legitimate use.

@@ -75,6 +75,22 @@ BEGIN
       'messages.error_code/error_title/error_details are missing — migration 042 did not apply';
   END IF;
 
+  -- Billing (043). Every account must get a trial row, and the gates
+  -- fail closed without one, so the trigger is as load-bearing as the
+  -- tables.
+  IF to_regclass('public.account_subscriptions') IS NULL THEN
+    RAISE EXCEPTION 'public.account_subscriptions is missing — migration 043 did not apply';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM public.plans WHERE id = 'trial') THEN
+    RAISE EXCEPTION 'the trial plan row was not seeded (migration 043)';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger
+    WHERE tgname = 'on_account_created_start_trial' AND NOT tgisinternal
+  ) THEN
+    RAISE EXCEPTION 'on_account_created_start_trial trigger is missing — migration 043 did not apply';
+  END IF;
+
   RAISE NOTICE 'schema verification passed';
 END
 $$;

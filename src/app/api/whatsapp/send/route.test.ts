@@ -132,6 +132,13 @@ vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(async () => supabaseMock),
 }))
 
+// Plan checks are covered in src/lib/billing; here they always pass.
+vi.mock('@/lib/billing/server', () => ({
+  requireUsableSubscription: vi.fn(async () => ({})),
+  requireFeature: vi.fn(async () => ({})),
+  requireWithinLimit: vi.fn(async () => ({})),
+}))
+
 vi.mock('@/lib/flows/admin-client', () => ({
   supabaseAdmin: () => ({
     from: () => {

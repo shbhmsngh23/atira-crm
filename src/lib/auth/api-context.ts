@@ -33,7 +33,14 @@ import { supabaseAdmin } from '@/lib/flows/admin-client';
 import { findActiveKeyByHash, touchLastUsed } from '@/lib/api-keys/store';
 import { hashApiKey, looksLikeApiKey } from '@/lib/api-keys/keys';
 import { hasScope, type ApiScope } from '@/lib/api-keys/scopes';
-import { forbidden, rateLimited, unauthorized } from '@/lib/api/v1/respond';
+import {
+  forbidden,
+  paymentRequired,
+  rateLimited,
+  unauthorized,
+} from '@/lib/api/v1/respond';
+import { PaymentRequiredError } from '@/lib/auth/account';
+import { loadBillingState } from '@/lib/billing/server';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 export interface ApiKeyContext {
@@ -73,6 +80,7 @@ function extractKey(request: Request): string | null {
  *   401 unauthorized — no key, malformed, unknown, revoked, expired
  *   403 forbidden    — valid key without the required scope
  *   429 rate_limited — per-key budget exhausted
+ *   402 payment_required — the account's plan is inactive or has no API
  *
  * On success, bumps `last_used_at` (fire-and-forget) and returns the
  * account context.
@@ -105,11 +113,31 @@ export async function requireApiKey(
     throw forbidden(`This API key is missing the '${scope}' scope`);
   }
 
+  // The key stays valid across plan changes; what the account's plan
+  // allows is checked on every request instead.
+  const supabase = supabaseAdmin();
+  try {
+    const billing = await loadBillingState(supabase, row.account_id);
+    if (!billing.usable) {
+      throw paymentRequired(
+        'This workspace has no active plan. Renew it in Settings → Billing.'
+      );
+    }
+    if (!billing.plan.feature_api) {
+      throw paymentRequired(
+        `API access is not included in the ${billing.plan.name} plan.`
+      );
+    }
+  } catch (err) {
+    if (err instanceof PaymentRequiredError) throw paymentRequired(err.message);
+    throw err;
+  }
+
   touchLastUsed(row.id);
 
   return {
     authType: 'api_key',
-    supabase: supabaseAdmin(),
+    supabase,
     accountId: row.account_id,
     keyId: row.id,
     scopes: row.scopes,
