@@ -337,7 +337,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            'This WhatsApp phone number is already linked to another account on this instance. Each phone number can only be connected to one wacrm user.',
+            'This WhatsApp phone number is already linked to another account on this instance. Each phone number can only be connected to one Atira CRM user.',
         },
         { status: 409 }
       )

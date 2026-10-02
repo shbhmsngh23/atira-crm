@@ -1,4 +1,6 @@
-# wacrm — CRM Template for WhatsApp
+# Atira CRM — CRM for WhatsApp
+
+> Atira CRM is based on [wacrm](https://github.com/ArnasDon/wacrm) by Arnas Donauskas (MIT License).
 
 > Self-hostable CRM template for WhatsApp® — shared inbox, contacts,
 > sales pipelines, broadcasts, and no-code automations. Fork it, brand
