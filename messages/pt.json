@@ -29,6 +29,7 @@
     "flows": "Fluxos",
     "aiAgents": "Agentes de IA",
     "settings": "Configurações",
+    "platformAdmin": "Administração da plataforma",
     "beta": "Beta",
     "unreadConversations": "{count} {count, plural, =1 {conversa não lida} other {conversas não lidas}}",
     "unreadNotifications": "{count} {count, plural, =1 {notificação não lida} other {notificações não lidas}}",
@@ -2063,7 +2064,8 @@
       "active": "Ativo",
       "past_due": "Pagamento pendente",
       "halted": "Pagamento falhou",
-      "cancelled": "Cancelado"
+      "cancelled": "Cancelado",
+      "suspended": "Suspenso"
     },
     "monthly": "Mensal",
     "yearly": "Anual",
@@ -2076,8 +2078,11 @@
     "renewsOn": "Renova em {date}",
     "endsOn": "Termina em {date}",
     "endedOn": "Terminou em {date}",
+    "activeUntil": "Ativo até {date}",
+    "manualPlan": "Plano combinado com a equipe do Atira CRM",
     "pastDueHint": "A Razorpay não conseguiu cobrar seu último pagamento e tentará novamente. Atualize sua forma de pagamento pelo e-mail da Razorpay para evitar interrupções.",
     "haltedHint": "Os pagamentos falharam e o plano foi interrompido. Escolha um plano para continuar.",
+    "suspendedHint": "Este espaço de trabalho foi suspenso. Entre em contato com o suporte para restaurar o acesso.",
     "usage": {
       "members": "Membros da equipe: {used} de {limit}",
       "membersUnlimited": "Membros da equipe: {used} (ilimitado)",
@@ -2118,6 +2123,8 @@
     "inactiveBody": "O envio de mensagens, os disparos, as automações, os fluxos de chatbot e as respostas com IA estão pausados até você escolher um plano. As mensagens recebidas dos clientes continuam sendo salvas.",
     "pastDueTitle": "Pagamento falhou",
     "pastDueBody": "A Razorpay tentará a cobrança novamente. Atualize sua forma de pagamento para evitar interrupções.",
+    "suspendedTitle": "Este espaço de trabalho foi suspenso",
+    "suspendedBody": "O envio de mensagens, os disparos, as automações, os fluxos de chatbot e as respostas com IA estão pausados. As mensagens recebidas dos clientes continuam sendo salvas. Entre em contato com o suporte para restaurar o acesso.",
     "choosePlan": "Escolher um plano"
   }
 }

@@ -164,8 +164,11 @@ export function BillingSettings() {
     subscription.razorpay_subscription_id !== null &&
     (subscription.status === 'active' || subscription.status === 'past_due');
 
+  const suspended = subscription.suspended_at !== null;
   let statusLine: string;
-  if (subscription.status === 'trialing') {
+  if (suspended) {
+    statusLine = t('suspendedHint');
+  } else if (subscription.status === 'trialing') {
     statusLine = t('trialEndsIn', { days: data.trialDaysLeft ?? 0 });
   } else if (subscription.status === 'cancelled' || subscription.cancel_at_period_end) {
     statusLine = data.usable
@@ -175,6 +178,11 @@ export function BillingSettings() {
     statusLine = t('haltedHint');
   } else if (subscription.status === 'past_due') {
     statusLine = t('pastDueHint');
+  } else if (!subscription.razorpay_subscription_id) {
+    // Granted by a platform admin, outside Razorpay.
+    statusLine = subscription.current_period_end
+      ? t('activeUntil', { date: fmtDate(subscription.current_period_end) })
+      : t('manualPlan');
   } else {
     statusLine = t('renewsOn', { date: fmtDate(subscription.current_period_end) });
   }
@@ -196,8 +204,8 @@ export function BillingSettings() {
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-2">
               <span className="text-lg font-semibold text-foreground">{plan.name}</span>
-              <Badge variant={STATUS_BADGE[subscription.status]}>
-                {t(`status.${subscription.status}`)}
+              <Badge variant={suspended ? 'destructive' : STATUS_BADGE[subscription.status]}>
+                {t(`status.${suspended ? 'suspended' : subscription.status}`)}
               </Badge>
               {subscription.billing_cycle ? (
                 <span className="text-sm text-muted-foreground">
@@ -263,7 +271,8 @@ export function BillingSettings() {
             subscription.billing_cycle === cycle &&
             isPaidAndRunning;
           const price = cycle === 'monthly' ? p.price_monthly_paise : p.price_yearly_paise;
-          const canBuy = data.canManage && data.checkoutEnabled && p.purchasable[cycle];
+          const canBuy =
+            data.canManage && data.checkoutEnabled && p.purchasable[cycle] && !suspended;
           const features: { label: string; included: boolean }[] = [
             {
               label:

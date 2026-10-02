@@ -91,23 +91,31 @@ Razorpay Dashboard → **Settings → Webhooks → Add new webhook**:
 Every delivery is recorded in the `billing_events` table, which is the
 first place to look when a payment doesn't show up in the app.
 
-## Support tasks (SQL, until the admin panel exists)
+## Platform admin console
 
-Extend a trial:
+People listed in `PLATFORM_ADMIN_EMAILS` (comma-separated, confirmed
+emails only) get an **Admin** link in the sidebar, leading to `/admin`:
 
-```sql
-UPDATE account_subscriptions
-SET status = 'trialing', trial_ends_at = NOW() + INTERVAL '7 days'
-WHERE account_id = '<account uuid>';
-```
+- **Dashboard:** workspaces, new sign-ups, MRR from Razorpay plans,
+  paying workspaces, trials ending within 7 days, failed payments.
+- **Workspace list:** search by workspace name, any member's email or
+  account id; filter by state (trial, trial expired, paid, cancelling,
+  granted, payment due, payment failed, cancelled, suspended).
+- **Per workspace:** members, WhatsApp connection, plan details, recent
+  Razorpay events, and these actions:
+  - **Extend or restart a trial** by 1–90 days.
+  - **Grant a plan by hand**, optionally until a date: for agency or
+    offline deals. Nothing is charged through Razorpay; the workspace
+    pauses when the date passes.
+  - **Suspend / unsuspend.** A suspended workspace is paused whatever
+    its plan, and paying doesn't lift it. The reason is shown only to
+    platform admins.
 
-Find a workspace's subscription:
+Trials and hand-granted plans are refused while Razorpay is still
+charging the workspace; cancel that subscription in Razorpay first.
 
-```sql
-SELECT a.name, s.*
-FROM account_subscriptions s JOIN accounts a ON a.id = s.account_id
-WHERE a.name ILIKE '%acme%';
-```
+Every action is recorded in `admin_audit_log` with who did it and the
+before/after values, and is listed in the workspace's panel.
 
 ## Known limitations
 

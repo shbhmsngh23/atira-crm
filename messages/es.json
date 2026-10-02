@@ -29,6 +29,7 @@
     "flows": "Flujos",
     "aiAgents": "Agentes de IA",
     "settings": "Configuración",
+    "platformAdmin": "Administración de la plataforma",
     "beta": "Beta",
     "unreadConversations": "{count} {count, plural, =1 {conversación sin leer} other {conversaciones sin leer}}",
     "unreadNotifications": "{count} {count, plural, =1 {notificación sin leer} other {notificaciones sin leer}}",
@@ -2063,7 +2064,8 @@
       "active": "Activo",
       "past_due": "Pago pendiente",
       "halted": "Pago fallido",
-      "cancelled": "Cancelado"
+      "cancelled": "Cancelado",
+      "suspended": "Suspendido"
     },
     "monthly": "Mensual",
     "yearly": "Anual",
@@ -2076,8 +2078,11 @@
     "renewsOn": "Se renueva el {date}",
     "endsOn": "Termina el {date}",
     "endedOn": "Terminó el {date}",
+    "activeUntil": "Activo hasta el {date}",
+    "manualPlan": "Plan acordado con el equipo de Atira CRM",
     "pastDueHint": "Razorpay no pudo cobrar tu último pago y lo volverá a intentar. Actualiza tu método de pago desde el correo de Razorpay para evitar interrupciones.",
     "haltedHint": "Los pagos fallaron y el plan se detuvo. Elige un plan para continuar.",
+    "suspendedHint": "Este espacio de trabajo ha sido suspendido. Contacta con soporte para restaurar el acceso.",
     "usage": {
       "members": "Miembros del equipo: {used} de {limit}",
       "membersUnlimited": "Miembros del equipo: {used} (ilimitados)",
@@ -2118,6 +2123,8 @@
     "inactiveBody": "El envío de mensajes, las difusiones, las automatizaciones, los flujos de chatbot y las respuestas con IA están en pausa hasta que elijas un plan. Los mensajes entrantes de clientes se siguen guardando.",
     "pastDueTitle": "Pago fallido",
     "pastDueBody": "Razorpay volverá a intentar el cobro. Actualiza tu método de pago para evitar interrupciones.",
+    "suspendedTitle": "Este espacio de trabajo ha sido suspendido",
+    "suspendedBody": "El envío de mensajes, las difusiones, las automatizaciones, los flujos de chatbot y las respuestas con IA están en pausa. Los mensajes entrantes de clientes se siguen guardando. Contacta con soporte para restaurar el acceso.",
     "choosePlan": "Elegir un plan"
   }
 }

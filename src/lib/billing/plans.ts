@@ -48,13 +48,16 @@ export interface Subscription {
   current_period_end: string | null;
   cancel_at_period_end: boolean;
   razorpay_subscription_id: string | null;
+  /** Set by a platform admin; pauses the workspace whatever its plan. */
+  suspended_at: string | null;
+  suspended_reason: string | null;
 }
 
 export const PLAN_COLUMNS =
   'id, name, description, price_monthly_paise, price_yearly_paise, razorpay_plan_id_monthly, razorpay_plan_id_yearly, max_members, max_automations, feature_ai, feature_api, feature_flows, is_public, sort_order';
 
 export const SUBSCRIPTION_COLUMNS =
-  'account_id, plan_id, status, billing_cycle, trial_ends_at, current_period_end, cancel_at_period_end, razorpay_subscription_id';
+  'account_id, plan_id, status, billing_cycle, trial_ends_at, current_period_end, cancel_at_period_end, razorpay_subscription_id, suspended_at, suspended_reason';
 
 function isFuture(iso: string | null, now: Date): boolean {
   if (!iso) return false;
@@ -65,21 +68,34 @@ function isFuture(iso: string | null, now: Date): boolean {
 /**
  * Whether the account may use the product right now.
  *
+ *   suspended — never, whatever the status (platform admin action)
  *   trialing  — until `trial_ends_at`
- *   active    — yes
+ *   active    — yes. A plan granted by a platform admin (no Razorpay
+ *               subscription) runs until `current_period_end` when one
+ *               is set. A Razorpay plan's period end is not enforced
+ *               here: Razorpay renews it and the webhook may lag.
  *   past_due  — yes: Razorpay is still retrying the card, so this is
  *               a grace period, not a lockout
  *   halted    — no: Razorpay gave up retrying (or the plan is paused)
  *   cancelled — until the end of the period already paid for
  */
 export function isSubscriptionUsable(
-  sub: Pick<Subscription, 'status' | 'trial_ends_at' | 'current_period_end'>,
+  sub: Pick<
+    Subscription,
+    'status' | 'trial_ends_at' | 'current_period_end'
+  > &
+    Partial<Pick<Subscription, 'razorpay_subscription_id' | 'suspended_at'>>,
   now: Date = new Date(),
 ): boolean {
+  if (sub.suspended_at) return false;
   switch (sub.status) {
     case 'trialing':
       return isFuture(sub.trial_ends_at, now);
     case 'active':
+      if (!sub.razorpay_subscription_id && sub.current_period_end) {
+        return isFuture(sub.current_period_end, now);
+      }
+      return true;
     case 'past_due':
       return true;
     case 'cancelled':
@@ -229,8 +245,11 @@ export function applyRazorpayEvent(
   const match = findPlanByRazorpayId(plans, entity.plan_id);
   if (!match) return null;
 
+  // With no subscription on file (trial, or a plan a platform admin
+  // granted by hand), only an activation may take over: a late
+  // "cancelled" for some old subscription must not overwrite it.
   const isSameSubscription =
-    !current?.razorpay_subscription_id ||
+    !!current?.razorpay_subscription_id &&
     current.razorpay_subscription_id === entity.id;
   if (!isSameSubscription && status !== 'active') return null;
 
@@ -251,7 +270,7 @@ export function applyRazorpayEvent(
   // For the same subscription the flag is left alone: a routine
   // `subscription.charged` must not undo a cancellation the customer
   // has already scheduled.
-  if (!isSameSubscription || !current?.razorpay_subscription_id) {
+  if (!isSameSubscription) {
     update.cancel_at_period_end = false;
   }
   return update;

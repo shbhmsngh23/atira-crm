@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { useTotalUnread } from "@/hooks/use-total-unread";
@@ -18,6 +18,7 @@ import {
   Radio,
   Settings,
   Shield,
+  ShieldCheck,
   User,
   UserCog,
   Users,
@@ -105,6 +106,13 @@ const bottomNavItems = [
   { href: "/settings", labelKey: "settings", icon: Settings },
 ];
 
+/** Shown only to platform admins (the people who run Atira CRM). */
+const platformAdminNavItem = {
+  href: "/admin",
+  labelKey: "platformAdmin",
+  icon: ShieldCheck,
+};
+
 interface SidebarProps {
   /** Controlled on mobile by the Header's hamburger button. Ignored on lg+. */
   open?: boolean;
@@ -118,6 +126,21 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { profile, profileLoading, account, accountRole, signOut } = useAuth();
   const totalUnread = useTotalUnread();
+  // The server re-checks on every /api/admin call; this only decides
+  // whether to show the link.
+  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/admin/me", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { isPlatformAdmin?: boolean } | null) => {
+        if (!cancelled) setIsPlatformAdmin(Boolean(data?.isPlatformAdmin));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const unreadNotifications = useUnreadNotifications();
   // Only surface the account-name strip when it actually carries
   // information. A solo user's personal account is named after them
@@ -271,7 +294,10 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
           <div className="my-4 border-t border-border" />
 
           <ul className="flex flex-col gap-1">
-            {bottomNavItems.map((item) => {
+            {(isPlatformAdmin
+              ? [...bottomNavItems, platformAdminNavItem]
+              : bottomNavItems
+            ).map((item) => {
               const isActive = pathname.startsWith(item.href);
               return (
                 <li key={item.href}>

@@ -87,6 +87,12 @@ export async function requireUsableSubscription(
 ): Promise<BillingState> {
   const state = await loadBillingState(ctx.supabase, ctx.accountId);
   if (!state.usable) {
+    if (state.subscription.suspended_at) {
+      throw new PaymentRequiredError(
+        'This workspace has been suspended. Contact support.',
+        'account_suspended',
+      );
+    }
     throw new PaymentRequiredError(
       state.subscription.status === 'trialing'
         ? 'Your free trial has ended. Choose a plan in Settings → Billing to continue.'

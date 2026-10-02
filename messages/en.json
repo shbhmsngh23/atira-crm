@@ -29,6 +29,7 @@
     "flows": "Flows",
     "aiAgents": "AI Agents",
     "settings": "Settings",
+    "platformAdmin": "Platform admin",
     "beta": "Beta",
     "unreadConversations": "{count} unread {count, plural, =1 {conversation} other {conversations}}",
     "unreadNotifications": "{count} unread {count, plural, =1 {notification} other {notifications}}",
@@ -2075,7 +2076,8 @@
       "active": "Active",
       "past_due": "Payment due",
       "halted": "Payment failed",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "suspended": "Suspended"
     },
     "monthly": "Monthly",
     "yearly": "Yearly",
@@ -2088,8 +2090,11 @@
     "renewsOn": "Renews on {date}",
     "endsOn": "Ends on {date}",
     "endedOn": "Ended on {date}",
+    "activeUntil": "Active until {date}",
+    "manualPlan": "Plan arranged with the Atira CRM team",
     "pastDueHint": "Razorpay couldn't collect your last payment and will retry. Update your payment method from the Razorpay email to avoid interruption.",
     "haltedHint": "Payments failed and the plan was stopped. Choose a plan to continue.",
+    "suspendedHint": "This workspace has been suspended. Contact support to restore access.",
     "usage": {
       "members": "Team members: {used} of {limit}",
       "membersUnlimited": "Team members: {used} (unlimited)",
@@ -2130,6 +2135,8 @@
     "inactiveBody": "Sending messages, broadcasts, automations, chatbot flows and AI replies are paused until you choose a plan. Incoming customer messages are still saved.",
     "pastDueTitle": "Payment failed",
     "pastDueBody": "Razorpay will retry the charge. Update your payment method to avoid interruption.",
+    "suspendedTitle": "This workspace has been suspended",
+    "suspendedBody": "Sending messages, broadcasts, automations, chatbot flows and AI replies are paused. Incoming customer messages are still saved. Contact support to restore access.",
     "choosePlan": "Choose a plan"
   }
 }

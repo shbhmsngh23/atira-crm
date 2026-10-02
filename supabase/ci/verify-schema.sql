@@ -91,6 +91,18 @@ BEGIN
     RAISE EXCEPTION 'on_account_created_start_trial trigger is missing — migration 043 did not apply';
   END IF;
 
+  -- Platform admin (044).
+  IF to_regclass('public.admin_audit_log') IS NULL THEN
+    RAISE EXCEPTION 'public.admin_audit_log is missing — migration 044 did not apply';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'account_subscriptions'
+      AND column_name = 'suspended_at'
+  ) THEN
+    RAISE EXCEPTION 'account_subscriptions.suspended_at is missing — migration 044 did not apply';
+  END IF;
+
   RAISE NOTICE 'schema verification passed';
 END
 $$;
