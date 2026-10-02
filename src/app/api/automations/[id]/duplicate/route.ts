@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireRole, toErrorResponse } from '@/lib/auth/account'
+import { requireWithinLimit } from '@/lib/billing/server'
 import { supabaseAdmin } from '@/lib/automations/admin-client'
 
 export async function POST(
@@ -15,6 +16,7 @@ export async function POST(
   let userId: string
   try {
     const ctx = await requireRole('agent')
+    await requireWithinLimit(ctx, 'automations')
     accountId = ctx.accountId
     userId = ctx.userId
   } catch (err) {

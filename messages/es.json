@@ -1671,7 +1671,8 @@
       "fields": "Campos y etiquetas",
       "deals": "Negocios y moneda",
       "members": "Miembros del equipo",
-      "api": "Claves de API"
+      "api": "Claves de API",
+      "billing": "Facturación y plan"
     },
     "groups": {
       "account": "Cuenta",
@@ -2049,5 +2050,74 @@
   },
   "DashboardShell": {
     "loading": "Cargando..."
+  },
+  "Billing": {
+    "title": "Facturación y plan",
+    "desc": "Tu plan de Atira CRM. Meta cobra los cargos de conversación de WhatsApp directamente a tu cuenta de WhatsApp Business.",
+    "loading": "Cargando datos de facturación...",
+    "loadFailed": "No se pudieron cargar los datos de facturación",
+    "networkError": "Error de red. Inténtalo de nuevo.",
+    "currentPlan": "Plan actual",
+    "status": {
+      "trialing": "Prueba gratuita",
+      "active": "Activo",
+      "past_due": "Pago pendiente",
+      "halted": "Pago fallido",
+      "cancelled": "Cancelado"
+    },
+    "monthly": "Mensual",
+    "yearly": "Anual",
+    "yearlySave": "2 meses gratis",
+    "cycleLabel": "Ciclo de facturación",
+    "perMonth": "/mes",
+    "perYear": "/año",
+    "gstNote": "Precios en INR, sin GST.",
+    "trialEndsIn": "{days, plural, =0 {Tu prueba gratuita ha terminado} one {Tu prueba gratuita termina en # día} other {Tu prueba gratuita termina en # días}}",
+    "renewsOn": "Se renueva el {date}",
+    "endsOn": "Termina el {date}",
+    "endedOn": "Terminó el {date}",
+    "pastDueHint": "Razorpay no pudo cobrar tu último pago y lo volverá a intentar. Actualiza tu método de pago desde el correo de Razorpay para evitar interrupciones.",
+    "haltedHint": "Los pagos fallaron y el plan se detuvo. Elige un plan para continuar.",
+    "usage": {
+      "members": "Miembros del equipo: {used} de {limit}",
+      "membersUnlimited": "Miembros del equipo: {used} (ilimitados)",
+      "automations": "Automatizaciones: {used} de {limit}",
+      "automationsUnlimited": "Automatizaciones: {used} (ilimitadas)"
+    },
+    "features": {
+      "members": "{count, plural, one {# miembro del equipo} other {# miembros del equipo}}",
+      "membersUnlimited": "Miembros del equipo ilimitados",
+      "automations": "{count, plural, one {# automatización} other {# automatizaciones}}",
+      "automationsUnlimited": "Automatizaciones ilimitadas",
+      "ai": "Respuestas con IA y base de conocimiento",
+      "flows": "Flujos de chatbot",
+      "api": "API REST y webhooks"
+    },
+    "choose": "Elegir plan",
+    "switch": "Cambiar a este plan",
+    "current": "Plan actual",
+    "notAvailable": "Aún no disponible",
+    "adminOnly": "Solo los administradores y el propietario pueden cambiar el plan.",
+    "checkoutDisabled": "Los pagos en línea aún no están configurados en este servidor.",
+    "redirecting": "Abriendo Razorpay...",
+    "changed": "Cambio de plan solicitado. Aparecerá aquí cuando Razorpay lo confirme.",
+    "subscribeFailed": "No se pudo iniciar el pago",
+    "cancel": "Cancelar plan",
+    "cancelTitle": "¿Cancelar tu plan?",
+    "cancelBody": "Tu plan sigue activo hasta el {date}. Después, el envío de mensajes, las difusiones, las automatizaciones y las respuestas con IA se detienen hasta que elijas un plan de nuevo. Tus datos se conservan.",
+    "cancelConfirm": "Cancelar plan",
+    "keep": "Mantener plan",
+    "cancelled": "Tu plan terminará el {date}.",
+    "cancelFailed": "No se pudo cancelar el plan"
+  },
+  "BillingBanner": {
+    "trialEnding": "{days, plural, one {Tu prueba gratuita termina en # día} other {Tu prueba gratuita termina en # días}}",
+    "trialEndingBody": "Elige un plan para que tu bandeja de entrada, difusiones y automatizaciones sigan funcionando.",
+    "trialEndedTitle": "Tu prueba gratuita ha terminado",
+    "inactiveTitle": "Tu espacio de trabajo está en pausa",
+    "inactiveBody": "El envío de mensajes, las difusiones, las automatizaciones, los flujos de chatbot y las respuestas con IA están en pausa hasta que elijas un plan. Los mensajes entrantes de clientes se siguen guardando.",
+    "pastDueTitle": "Pago fallido",
+    "pastDueBody": "Razorpay volverá a intentar el cobro. Actualiza tu método de pago para evitar interrupciones.",
+    "choosePlan": "Elegir un plan"
   }
 }

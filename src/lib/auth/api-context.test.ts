@@ -19,6 +19,15 @@ vi.mock("@/lib/api-keys/store", () => ({
   touchLastUsed: (id: string) => touchLastUsed(id),
 }));
 
+// Billing: an active plan with API access unless a test says otherwise.
+const loadBillingState = vi.fn(async () => ({
+  usable: true,
+  plan: { name: "Growth", feature_api: true },
+}));
+vi.mock("@/lib/billing/server", () => ({
+  loadBillingState: () => loadBillingState(),
+}));
+
 // Import AFTER the mocks are registered.
 const { requireApiKey } = await import("./api-context");
 
@@ -127,6 +136,33 @@ describe("requireApiKey", () => {
       requireApiKey(reqWith(`Bearer ${KEY}`)),
       "rate_limited",
       429,
+    );
+  });
+
+  it("402s when the workspace has no active plan", async () => {
+    findActiveKeyByHash.mockResolvedValue(row());
+    loadBillingState.mockResolvedValueOnce({
+      usable: false,
+      plan: { name: "Free trial", feature_api: true },
+    });
+    await expectApiError(
+      requireApiKey(reqWith(`Bearer ${KEY}`)),
+      "payment_required",
+      402,
+    );
+    expect(touchLastUsed).not.toHaveBeenCalled();
+  });
+
+  it("402s when the plan has no API access", async () => {
+    findActiveKeyByHash.mockResolvedValue(row());
+    loadBillingState.mockResolvedValueOnce({
+      usable: true,
+      plan: { name: "Starter", feature_api: false },
+    });
+    await expectApiError(
+      requireApiKey(reqWith(`Bearer ${KEY}`)),
+      "payment_required",
+      402,
     );
   });
 });

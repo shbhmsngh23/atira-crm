@@ -1681,7 +1681,8 @@
       "fields": "Fields & tags",
       "deals": "Deals & currency",
       "members": "Team members",
-      "api": "API keys"
+      "api": "API keys",
+      "billing": "Billing & plan"
     },
     "groups": {
       "account": "Account",
@@ -2061,5 +2062,74 @@
   },
   "DashboardShell": {
     "loading": "Loading..."
+  },
+  "Billing": {
+    "title": "Billing & plan",
+    "desc": "Your Atira CRM plan. WhatsApp conversation charges are billed by Meta directly to your WhatsApp Business Account.",
+    "loading": "Loading billing details...",
+    "loadFailed": "Couldn't load billing details",
+    "networkError": "Network error — please try again.",
+    "currentPlan": "Current plan",
+    "status": {
+      "trialing": "Free trial",
+      "active": "Active",
+      "past_due": "Payment due",
+      "halted": "Payment failed",
+      "cancelled": "Cancelled"
+    },
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "yearlySave": "2 months free",
+    "cycleLabel": "Billing cycle",
+    "perMonth": "/month",
+    "perYear": "/year",
+    "gstNote": "Prices in INR, excluding GST.",
+    "trialEndsIn": "{days, plural, =0 {Your free trial has ended} one {Your free trial ends in # day} other {Your free trial ends in # days}}",
+    "renewsOn": "Renews on {date}",
+    "endsOn": "Ends on {date}",
+    "endedOn": "Ended on {date}",
+    "pastDueHint": "Razorpay couldn't collect your last payment and will retry. Update your payment method from the Razorpay email to avoid interruption.",
+    "haltedHint": "Payments failed and the plan was stopped. Choose a plan to continue.",
+    "usage": {
+      "members": "Team members: {used} of {limit}",
+      "membersUnlimited": "Team members: {used} (unlimited)",
+      "automations": "Automations: {used} of {limit}",
+      "automationsUnlimited": "Automations: {used} (unlimited)"
+    },
+    "features": {
+      "members": "{count, plural, one {# team member} other {# team members}}",
+      "membersUnlimited": "Unlimited team members",
+      "automations": "{count, plural, one {# automation} other {# automations}}",
+      "automationsUnlimited": "Unlimited automations",
+      "ai": "AI replies & knowledge base",
+      "flows": "Chatbot flows",
+      "api": "REST API & webhooks"
+    },
+    "choose": "Choose plan",
+    "switch": "Switch to this plan",
+    "current": "Current plan",
+    "notAvailable": "Not available yet",
+    "adminOnly": "Only admins and the owner can change the plan.",
+    "checkoutDisabled": "Online payments aren't set up on this server yet.",
+    "redirecting": "Opening Razorpay...",
+    "changed": "Plan change requested. It will show here once Razorpay confirms it.",
+    "subscribeFailed": "Couldn't start the checkout",
+    "cancel": "Cancel plan",
+    "cancelTitle": "Cancel your plan?",
+    "cancelBody": "Your plan stays active until {date}. After that, sending messages, broadcasts, automations and AI replies stop until you choose a plan again. Your data is kept.",
+    "cancelConfirm": "Cancel plan",
+    "keep": "Keep plan",
+    "cancelled": "Your plan will end on {date}.",
+    "cancelFailed": "Couldn't cancel the plan"
+  },
+  "BillingBanner": {
+    "trialEnding": "{days, plural, one {Your free trial ends in # day} other {Your free trial ends in # days}}",
+    "trialEndingBody": "Choose a plan to keep your inbox, broadcasts and automations running.",
+    "trialEndedTitle": "Your free trial has ended",
+    "inactiveTitle": "Your workspace is paused",
+    "inactiveBody": "Sending messages, broadcasts, automations, chatbot flows and AI replies are paused until you choose a plan. Incoming customer messages are still saved.",
+    "pastDueTitle": "Payment failed",
+    "pastDueBody": "Razorpay will retry the charge. Update your payment method to avoid interruption.",
+    "choosePlan": "Choose a plan"
   }
 }

@@ -21,6 +21,7 @@ export type ApiErrorCode =
   | 'unauthorized' // missing / malformed / unknown / revoked / expired key
   | 'forbidden' // valid key, but missing the required scope
   | 'rate_limited' // per-key budget exhausted
+  | 'payment_required' // trial over, plan lapsed, or plan has no API access
   | 'bad_request' // malformed input
   | 'not_found'
   | 'internal';
@@ -58,6 +59,11 @@ export function unauthorized(message = 'Missing or invalid API key'): ApiError {
 /** 403 — authenticated, but the key lacks the scope this route needs. */
 export function forbidden(message: string): ApiError {
   return new ApiError('forbidden', message, 403);
+}
+
+/** 402 — the account's plan doesn't allow API use right now. */
+export function paymentRequired(message: string): ApiError {
+  return new ApiError('payment_required', message, 402);
 }
 
 /** 400 — bad input. */

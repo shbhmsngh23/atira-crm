@@ -18,6 +18,8 @@ import { runAutomationsForTrigger } from '@/lib/automations/engine'
 import { dispatchInboundToFlows } from '@/lib/flows/engine'
 import { dispatchInboundToAiReply } from '@/lib/ai/auto-reply'
 import { dispatchWebhookEvent } from '@/lib/webhooks/deliver'
+import { PaymentRequiredError } from '@/lib/auth/account'
+import { loadBillingState } from '@/lib/billing/server'
 import {
   handleTemplateWebhookChange,
   isTemplateWebhookField,
@@ -857,6 +859,12 @@ async function processMessage(
   // trigger installed in migration 003).
   await flagBroadcastReplyIfAny(accountId, contactRecord.id)
 
+  // Plan gate for everything below that acts on the customer's behalf.
+  // The inbound message itself is always stored (above) so a lapsed
+  // workspace never loses customer messages; it just stops getting bot
+  // replies, automations and API webhooks until it picks a plan.
+  const entitlements = await loadInboundEntitlements(accountId)
+
   // ============================================================
   // Flow runner dispatch.
   //
@@ -876,26 +884,28 @@ async function processMessage(
   // no active flows take the runner's early-exit "no_match" path
   // basically for free (one indexed SELECT for the active run).
   // ============================================================
-  const flowResult = await dispatchInboundToFlows({
-    accountId,
-    userId: configOwnerUserId,
-    contactId: contactRecord.id,
-    conversationId: conversation.id,
-    message:
-      interactiveReplyId
-        ? {
-            kind: 'interactive_reply',
-            reply_id: interactiveReplyId,
-            reply_title: contentText ?? '',
-            meta_message_id: message.id,
-          }
-        : {
-            kind: 'text',
-            text: contentText ?? message.text?.body ?? '',
-            meta_message_id: message.id,
-          },
-    isFirstInboundMessage,
-  })
+  const flowResult = !entitlements.flows
+    ? { consumed: false }
+    : await dispatchInboundToFlows({
+        accountId,
+        userId: configOwnerUserId,
+        contactId: contactRecord.id,
+        conversationId: conversation.id,
+        message:
+          interactiveReplyId
+            ? {
+                kind: 'interactive_reply',
+                reply_id: interactiveReplyId,
+                reply_title: contentText ?? '',
+                meta_message_id: message.id,
+              }
+            : {
+                kind: 'text',
+                text: contentText ?? message.text?.body ?? '',
+                meta_message_id: message.id,
+              },
+        isFirstInboundMessage,
+      })
   const flowConsumed = flowResult.consumed
 
   // Fire any automations that react to this webhook event. All dispatches
@@ -939,7 +949,7 @@ async function processMessage(
   // logging zero steps. `runAutomationsForTrigger` owns its own try/catch
   // and never throws; the `.catch` is belt-and-braces so one trigger
   // type's failure can't skip the rest of the loop.
-  for (const triggerType of automationTriggers) {
+  for (const triggerType of entitlements.usable ? automationTriggers : []) {
     await runAutomationsForTrigger({
       accountId,
       triggerType,
@@ -959,7 +969,7 @@ async function processMessage(
   // the account has enabled it. Awaited inside `after()` (same reason as
   // the webhook dispatch below); `dispatchInboundToAiReply` owns its
   // eligibility gates + try/catch and never throws.
-  if (!flowConsumed && !interactiveReplyId && inboundText.trim()) {
+  if (entitlements.ai && !flowConsumed && !interactiveReplyId && inboundText.trim()) {
     await dispatchInboundToAiReply({
       accountId,
       conversationId: conversation.id,
@@ -978,13 +988,44 @@ async function processMessage(
   // when the account has no matching endpoint and never throws.
   // (conversation.created is emitted earlier, right after the thread is
   // opened.)
-  await dispatchWebhookEvent(supabaseAdmin(), accountId, 'message.received', {
-    conversation_id: conversation.id,
-    contact_id: contactRecord.id,
-    whatsapp_message_id: message.id,
-    content_type: contentType,
-    text: contentText,
-  })
+  if (entitlements.api) {
+    await dispatchWebhookEvent(supabaseAdmin(), accountId, 'message.received', {
+      conversation_id: conversation.id,
+      contact_id: contactRecord.id,
+      whatsapp_message_id: message.id,
+      content_type: contentType,
+      text: contentText,
+    })
+  }
+}
+
+/**
+ * What the account's plan lets inbound processing do. A lapsed or
+ * missing subscription turns everything off. An unexpected error
+ * loading the plan fails open, because an outage in the billing tables
+ * must not silently stop every customer's bots.
+ */
+async function loadInboundEntitlements(accountId: string): Promise<{
+  usable: boolean
+  flows: boolean
+  ai: boolean
+  api: boolean
+}> {
+  try {
+    const { plan, usable } = await loadBillingState(supabaseAdmin(), accountId)
+    return {
+      usable,
+      flows: usable && plan.feature_flows,
+      ai: usable && plan.feature_ai,
+      api: usable && plan.feature_api,
+    }
+  } catch (err) {
+    if (err instanceof PaymentRequiredError) {
+      return { usable: false, flows: false, ai: false, api: false }
+    }
+    console.error('[webhook] billing lookup failed, not gating:', err)
+    return { usable: true, flows: true, ai: true, api: true }
+  }
 }
 
 async function parseMessageContent(
