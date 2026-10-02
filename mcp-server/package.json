@@ -5,10 +5,10 @@
   "description": "Model Context Protocol (MCP) server for wacrm — drive your self-hosted WhatsApp CRM from Claude, Cursor, and other MCP clients.",
   "license": "MIT",
   "author": "Arnas Donauskas",
-  "homepage": "https://github.com/ArnasDon/wacrm",
+  "homepage": "https://github.com/shbhmsngh23/atira-crm",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ArnasDon/wacrm.git",
+    "url": "git+https://github.com/shbhmsngh23/atira-crm.git",
     "directory": "mcp-server"
   },
   "keywords": [

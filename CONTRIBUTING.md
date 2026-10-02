@@ -16,10 +16,8 @@ opinions become yours.
 ## Fork and run
 
 ```bash
-# 1. Fork on GitHub: https://github.com/ArnasDon/wacrm → Fork
-# 2. Clone your fork
-git clone https://github.com/<your-username>/wacrm.git
-cd wacrm
+git clone https://github.com/shbhmsngh23/atira-crm.git
+cd atira-crm
 
 cp .env.local.example .env.local   # fill in Supabase + Meta creds
 npm install
@@ -50,7 +48,7 @@ updating on your schedule is a valid alternative.
 
 If you find a bug in the upstream code — not one you introduced in your
 fork — please file it using the
-[bug report](https://github.com/ArnasDon/wacrm/issues/new?template=bug_report.yml)
+[bug report](https://github.com/shbhmsngh23/atira-crm/issues/new?template=bug_report.yml)
 template. Including the commit SHA, the runtime (Hostinger / Vercel /
 local / other), and logs will get to a fix fastest.
 

@@ -1,7 +1,7 @@
 # wacrm MCP server
 
 A [Model Context Protocol](https://modelcontextprotocol.io) server for
-**[wacrm](https://github.com/ArnasDon/wacrm)** — the self-hostable
+**[Atira CRM](https://github.com/shbhmsngh23/atira-crm)** — the self-hostable
 WhatsApp CRM. It lets MCP clients (Claude Desktop, Claude Code, Cursor,
 and others) drive your CRM in natural language:
 

@@ -3,7 +3,7 @@
   "name": "io.github.ArnasDon/wacrm-mcp",
   "description": "Drive a self-hosted wacrm WhatsApp CRM from Claude, Cursor and other MCP clients.",
   "repository": {
-    "url": "https://github.com/ArnasDon/wacrm",
+    "url": "https://github.com/shbhmsngh23/atira-crm",
     "source": "github",
     "subfolder": "mcp-server"
   },
