@@ -28,6 +28,22 @@ export async function GET() {
       return NextResponse.json({ error: 'Failed to load plans' }, { status: 500 });
     }
 
+    // A workspace created from the switcher (migration 046) starts with
+    // its trial already over. Tell the UI so it can say "no plan yet"
+    // rather than "your trial has ended".
+    const { data: subMeta } = await ctx.supabase
+      .from('account_subscriptions')
+      .select('created_at')
+      .eq('account_id', ctx.accountId)
+      .maybeSingle<{ created_at: string }>();
+    const trialEnd = state.subscription.trial_ends_at
+      ? Date.parse(state.subscription.trial_ends_at)
+      : NaN;
+    const hadTrial =
+      subMeta !== null &&
+      Number.isFinite(trialEnd) &&
+      trialEnd - Date.parse(subMeta.created_at) > 86_400_000;
+
     const [members, automations] = await Promise.all([
       countUsage(ctx.accountId, 'members'),
       countUsage(ctx.accountId, 'automations'),
@@ -39,6 +55,7 @@ export async function GET() {
       subscription: { ...state.subscription, suspended_reason: null },
       usable: state.usable,
       trialDaysLeft: trialDaysLeft(state.subscription),
+      hadTrial,
       usage: { members, automations },
       // Razorpay plan ids are configuration, not something the browser
       // needs; expose only whether each cycle can be bought.

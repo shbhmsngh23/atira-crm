@@ -48,6 +48,7 @@ interface BillingResponse {
   subscription: Subscription;
   usable: boolean;
   trialDaysLeft: number | null;
+  hadTrial: boolean;
   usage: { members: number; automations: number };
   plans: CatalogPlan[];
   checkoutEnabled: boolean;
@@ -165,9 +166,13 @@ export function BillingSettings() {
     (subscription.status === 'active' || subscription.status === 'past_due');
 
   const suspended = subscription.suspended_at !== null;
+  // Created from the workspace switcher: never had a trial (migration 046).
+  const noPlanYet = subscription.status === 'trialing' && !data.hadTrial;
   let statusLine: string;
   if (suspended) {
     statusLine = t('suspendedHint');
+  } else if (noPlanYet) {
+    statusLine = t('noPlanHint');
   } else if (subscription.status === 'trialing') {
     statusLine = t('trialEndsIn', { days: data.trialDaysLeft ?? 0 });
   } else if (subscription.status === 'cancelled' || subscription.cancel_at_period_end) {
@@ -203,10 +208,14 @@ export function BillingSettings() {
               {t('currentPlan')}
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-2">
-              <span className="text-lg font-semibold text-foreground">{plan.name}</span>
-              <Badge variant={suspended ? 'destructive' : STATUS_BADGE[subscription.status]}>
-                {t(`status.${suspended ? 'suspended' : subscription.status}`)}
-              </Badge>
+              <span className="text-lg font-semibold text-foreground">
+                {noPlanYet ? t('noPlanName') : plan.name}
+              </span>
+              {noPlanYet ? null : (
+                <Badge variant={suspended ? 'destructive' : STATUS_BADGE[subscription.status]}>
+                  {t(`status.${suspended ? 'suspended' : subscription.status}`)}
+                </Badge>
+              )}
               {subscription.billing_cycle ? (
                 <span className="text-sm text-muted-foreground">
                   {t(subscription.billing_cycle)}

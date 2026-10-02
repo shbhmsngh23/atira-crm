@@ -17,7 +17,7 @@
     "linkInvalid": "이 링크로는 로그인할 수 없습니다. 이메일 인증 중이었다면 이미 인증이 완료되었을 수 있으니 아래에서 로그인하세요. 비밀번호 재설정은 새 링크를 요청한 뒤 요청한 브라우저에서 열어 주세요."
   },
   "Sidebar": {
-    "title": "WhatsApp용 CRM 템플릿",
+    "title": "Atira CRM",
     "primaryNav": "기본 메뉴",
     "dashboard": "대시보드",
     "inbox": "인박스",
@@ -53,6 +53,9 @@
     "broadcasts": "브로드캐스트",
     "automations": "자동화",
     "settings": "설정",
+    "flows": "플로우",
+    "aiAgents": "AI 에이전트",
+    "platformAdmin": "플랫폼 관리",
     "openMenu": "메뉴 열기",
     "openAccountMenu": "계정 메뉴 열기",
     "defaultUser": "사용자",
@@ -1931,7 +1934,7 @@
     "titleJoin": "계정 만들고 참여하기",
     "title": "계정 만들기",
     "descJoin": "이메일을 인증한 뒤 초대를 수락해 팀에 참여하세요.",
-    "desc": "WhatsApp용 CRM Template을 시작하세요",
+    "desc": "Atira CRM 시작하기",
     "fullNameLabel": "이름",
     "fullNamePlaceholder": "홍길동",
     "emailLabel": "이메일",
@@ -2087,6 +2090,8 @@
   },
   "Billing": {
     "title": "결제 및 요금제",
+    "noPlanName": "아직 요금제 없음",
+    "noPlanHint": "아래에서 요금제를 선택하면 이 워크스페이스를 사용할 수 있습니다.",
     "desc": "Atira CRM 요금제입니다. WhatsApp 대화 요금은 Meta가 WhatsApp 비즈니스 계정으로 직접 청구합니다.",
     "loading": "결제 정보를 불러오는 중...",
     "loadFailed": "결제 정보를 불러오지 못했습니다",
@@ -2151,6 +2156,8 @@
   "BillingBanner": {
     "trialEnding": "{days, plural, other {무료 체험이 #일 후 종료됩니다}}",
     "trialEndingBody": "인박스, 브로드캐스트, 자동화를 계속 사용하려면 요금제를 선택하세요.",
+    "noPlanTitle": "이 워크스페이스에는 아직 요금제가 없습니다",
+    "noPlanBody": "요금제를 선택하면 메시지, 브로드캐스트, 자동화를 보낼 수 있습니다. 고객이 보낸 메시지는 이미 저장되고 있습니다.",
     "trialEndedTitle": "무료 체험이 종료되었습니다",
     "inactiveTitle": "워크스페이스가 일시 중지되었습니다",
     "inactiveBody": "요금제를 선택할 때까지 메시지 전송, 브로드캐스트, 자동화, 챗봇 플로우, AI 답장이 일시 중지됩니다. 고객이 보낸 메시지는 계속 저장됩니다.",

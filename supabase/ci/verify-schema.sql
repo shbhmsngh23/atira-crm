@@ -131,6 +131,13 @@ BEGIN
     RAISE EXCEPTION 'whatsapp_config.registration_pin is missing — migration 047 did not apply';
   END IF;
 
+  -- API role grants (048). Without them every signed-in request fails
+  -- with "permission denied for table profiles" on newer Supabase stacks.
+  IF NOT has_table_privilege('authenticated', 'public.profiles', 'SELECT')
+     OR NOT has_table_privilege('service_role', 'public.account_subscriptions', 'UPDATE') THEN
+    RAISE EXCEPTION 'authenticated / service_role lack table grants — migration 048 did not apply';
+  END IF;
+
   RAISE NOTICE 'schema verification passed';
 END
 $$;

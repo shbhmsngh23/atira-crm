@@ -17,7 +17,7 @@
     "linkInvalid": "No se pudo iniciar sesión con ese enlace. Si estabas confirmando tu correo, es posible que ya esté verificado; inicia sesión abajo. Para restablecer la contraseña, pide un enlace nuevo y ábrelo en el mismo navegador desde el que lo solicitaste."
   },
   "Sidebar": {
-    "title": "Plantilla de CRM para WhatsApp",
+    "title": "Atira CRM",
     "primaryNav": "Principal",
     "dashboard": "Panel",
     "inbox": "Bandeja de entrada",
@@ -53,6 +53,9 @@
     "broadcasts": "Difusiones",
     "automations": "Automatizaciones",
     "settings": "Configuración",
+    "flows": "Flujos",
+    "aiAgents": "Agentes de IA",
+    "platformAdmin": "Administración de la plataforma",
     "openMenu": "Abrir menú",
     "openAccountMenu": "Abrir menú de la cuenta",
     "defaultUser": "Usuario",
@@ -1919,7 +1922,7 @@
     "titleJoin": "Crear cuenta y unirse",
     "title": "Crear cuenta",
     "descJoin": "Verifica tu correo y luego acepta la invitación para unirte a tu equipo.",
-    "desc": "Empieza a usar la Plantilla de CRM para WhatsApp",
+    "desc": "Empieza con Atira CRM",
     "fullNameLabel": "Nombre completo",
     "fullNamePlaceholder": "Juan Pérez",
     "emailLabel": "Correo electrónico",
@@ -2075,6 +2078,8 @@
   },
   "Billing": {
     "title": "Facturación y plan",
+    "noPlanName": "Aún sin plan",
+    "noPlanHint": "Elige un plan abajo para empezar a usar este espacio de trabajo.",
     "desc": "Tu plan de Atira CRM. Meta cobra los cargos de conversación de WhatsApp directamente a tu cuenta de WhatsApp Business.",
     "loading": "Cargando datos de facturación...",
     "loadFailed": "No se pudieron cargar los datos de facturación",
@@ -2139,6 +2144,8 @@
   "BillingBanner": {
     "trialEnding": "{days, plural, one {Tu prueba gratuita termina en # día} other {Tu prueba gratuita termina en # días}}",
     "trialEndingBody": "Elige un plan para que tu bandeja de entrada, difusiones y automatizaciones sigan funcionando.",
+    "noPlanTitle": "Este espacio de trabajo aún no tiene plan",
+    "noPlanBody": "Elige un plan para empezar a enviar mensajes, difusiones y automatizaciones. Los mensajes entrantes de clientes ya se están guardando.",
     "trialEndedTitle": "Tu prueba gratuita ha terminado",
     "inactiveTitle": "Tu espacio de trabajo está en pausa",
     "inactiveBody": "El envío de mensajes, las difusiones, las automatizaciones, los flujos de chatbot y las respuestas con IA están en pausa hasta que elijas un plan. Los mensajes entrantes de clientes se siguen guardando.",
