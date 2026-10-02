@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { CreditCard, TriangleAlert } from "lucide-react";
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { CreditCard, TriangleAlert } from 'lucide-react';
 
-import { useAuth } from "@/hooks/use-auth";
-import { buttonVariants } from "@/components/ui/button";
+import { useAuth } from '@/hooks/use-auth';
+import { buttonVariants } from '@/components/ui/button';
 import {
   Alert,
   AlertAction,
   AlertDescription,
   AlertTitle,
-} from "@/components/ui/alert";
-import type { SubscriptionStatus } from "@/lib/billing/plans";
+} from '@/components/ui/alert';
+import type { SubscriptionStatus } from '@/lib/billing/plans';
 
 /** Start nagging this many days before the trial ends. */
 const TRIAL_WARNING_DAYS = 3;
@@ -22,7 +22,7 @@ const TRIAL_WARNING_DAYS = 3;
 interface BillingSummary {
   usable: boolean;
   trialDaysLeft: number | null;
-  subscription: { status: SubscriptionStatus };
+  subscription: { status: SubscriptionStatus; suspended_at: string | null };
 }
 
 /**
@@ -34,13 +34,13 @@ interface BillingSummary {
 export function BillingBanner() {
   const { accountStatus } = useAuth();
   const pathname = usePathname();
-  const t = useTranslations("BillingBanner");
+  const t = useTranslations('BillingBanner');
   const [summary, setSummary] = useState<BillingSummary | null>(null);
 
   useEffect(() => {
-    if (accountStatus !== "ready") return;
+    if (accountStatus !== 'ready') return;
     let cancelled = false;
-    fetch("/api/billing", { cache: "no-store" })
+    fetch('/api/billing', { cache: 'no-store' })
       .then((res) => (res.ok ? res.json() : null))
       .then((data: BillingSummary | null) => {
         if (!cancelled && data) setSummary(data);
@@ -54,45 +54,55 @@ export function BillingBanner() {
     };
   }, [accountStatus]);
 
-  if (!summary || pathname.startsWith("/settings")) return null;
+  if (!summary || pathname.startsWith('/settings')) return null;
 
   const { usable, trialDaysLeft, subscription } = summary;
   const trialEnding =
     usable &&
-    subscription.status === "trialing" &&
+    subscription.status === 'trialing' &&
     trialDaysLeft !== null &&
     trialDaysLeft <= TRIAL_WARNING_DAYS;
-  const pastDue = usable && subscription.status === "past_due";
+  const pastDue = usable && subscription.status === 'past_due';
 
   if (usable && !trialEnding && !pastDue) return null;
 
   let title: string;
   let body: string;
-  if (!usable) {
+  if (subscription.suspended_at) {
+    title = t('suspendedTitle');
+    body = t('suspendedBody');
+  } else if (!usable) {
     title =
-      subscription.status === "trialing" ? t("trialEndedTitle") : t("inactiveTitle");
-    body = t("inactiveBody");
+      subscription.status === 'trialing'
+        ? t('trialEndedTitle')
+        : t('inactiveTitle');
+    body = t('inactiveBody');
   } else if (pastDue) {
-    title = t("pastDueTitle");
-    body = t("pastDueBody");
+    title = t('pastDueTitle');
+    body = t('pastDueBody');
   } else {
-    title = t("trialEnding", { days: trialDaysLeft ?? 0 });
-    body = t("trialEndingBody");
+    title = t('trialEnding', { days: trialDaysLeft ?? 0 });
+    body = t('trialEndingBody');
   }
 
   return (
-    <Alert variant={usable ? "default" : "destructive"} className="mb-4">
+    <Alert variant={usable ? 'default' : 'destructive'} className="mb-4">
       {usable ? <CreditCard /> : <TriangleAlert />}
       <AlertTitle>{title}</AlertTitle>
       <AlertDescription>{body}</AlertDescription>
-      <AlertAction>
-        <Link
-          href="/settings?tab=billing"
-          className={buttonVariants({ size: "sm", variant: usable ? "outline" : "default" })}
-        >
-          {t("choosePlan")}
-        </Link>
-      </AlertAction>
+      {subscription.suspended_at ? null : (
+        <AlertAction>
+          <Link
+            href="/settings?tab=billing"
+            className={buttonVariants({
+              size: 'sm',
+              variant: usable ? 'outline' : 'default',
+            })}
+          >
+            {t('choosePlan')}
+          </Link>
+        </AlertAction>
+      )}
     </Alert>
   );
 }

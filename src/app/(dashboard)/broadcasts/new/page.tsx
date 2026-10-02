@@ -45,6 +45,8 @@ export default function NewBroadcastPage() {
   >({});
   const [headerMediaUrl, setHeaderMediaUrl] = useState('');
   const [name, setName] = useState('');
+  // '' = send now; otherwise a datetime-local value in the viewer's time.
+  const [scheduledAt, setScheduledAt] = useState('');
 
   async function handleSend() {
     if (!template) return;
@@ -62,6 +64,7 @@ export default function NewBroadcastPage() {
         },
         variables,
         headerMediaUrl,
+        scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
       });
       router.push(`/broadcasts/${broadcastId}`);
     } catch (err) {
@@ -222,6 +225,8 @@ export default function NewBroadcastPage() {
               template={template}
               audience={audience}
               onSend={handleSend}
+              scheduledAt={scheduledAt}
+              onScheduledAtChange={setScheduledAt}
               onSaveDraft={handleSaveDraft}
               onBack={() => setCurrentStep(2)}
               isProcessing={isProcessing}

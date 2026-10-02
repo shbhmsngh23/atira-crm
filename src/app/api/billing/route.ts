@@ -35,7 +35,8 @@ export async function GET() {
 
     return NextResponse.json({
       plan: state.plan,
-      subscription: state.subscription,
+      // The reason is an internal note for platform admins.
+      subscription: { ...state.subscription, suspended_reason: null },
       usable: state.usable,
       trialDaysLeft: trialDaysLeft(state.subscription),
       usage: { members, automations },

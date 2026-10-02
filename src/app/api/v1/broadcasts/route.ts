@@ -26,22 +26,17 @@ import { after } from 'next/server';
 
 import { requireApiKey } from '@/lib/auth/api-context';
 
-// The `after()` fan-out below sends to every recipient sequentially and
-// runs within this route's max duration (the same constraint the
-// webhook route documents). Give it headroom beyond the platform
-// default so a modest batch isn't cut off mid-send — which would leave
-// recipient rows 'pending' and the broadcast stuck 'sending'. This is a
-// bound, not a guarantee: a near-cap (MAX_RECIPIENTS) audience can
-// still exceed 60s, so very large sends should be split across
-// requests. A durable queue/cron drain is the complete fix (follow-up).
-export const maxDuration = 60;
+// The `after()` run below sends until shortly before this limit; any
+// recipients it doesn't reach stay 'pending' and are continued by the
+// broadcast worker (GET /api/broadcasts/cron).
+export const maxDuration = 300;
+
+/** Stop starting new sends this long before the function's limit. */
+const RUN_BUDGET_MS = (maxDuration - 30) * 1000;
 import { ok, fail, toApiErrorResponse } from '@/lib/api/v1/respond';
 import { resolveAuditUserId, ContactError } from '@/lib/api/v1/contacts';
-import {
-  createBroadcast,
-  deliverBroadcast,
-  BroadcastError,
-} from '@/lib/whatsapp/broadcast-core';
+import { createBroadcast, BroadcastError } from '@/lib/whatsapp/broadcast-core';
+import { runBroadcastDelivery } from '@/lib/whatsapp/broadcast-queue';
 
 export async function POST(request: Request) {
   try {
@@ -74,10 +69,16 @@ export async function POST(request: Request) {
       })),
     });
 
-    // Fan out after the response is sent. Uses the same service-role
-    // client — no request-scoped auth needed for the Meta calls or
-    // the account-scoped row updates.
-    after(() => deliverBroadcast(ctx.supabase, plan));
+    // Fan out after the response is sent, through the same worker as
+    // dashboard broadcasts: paced, and whatever this run doesn't finish
+    // is continued by GET /api/broadcasts/cron. Uses the same
+    // service-role client — no request-scoped auth needed.
+    const deadline = Date.now() + RUN_BUDGET_MS;
+    after(() =>
+      runBroadcastDelivery(ctx.supabase, plan.broadcastId, deadline).catch((err) =>
+        console.error('[api/v1/broadcasts] delivery failed:', err)
+      )
+    );
 
     return ok(
       {

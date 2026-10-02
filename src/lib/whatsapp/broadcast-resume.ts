@@ -146,7 +146,7 @@ export async function planBroadcastResume(
 ): Promise<ResumePlan> {
   const { data: broadcast, error: bcError } = await db
     .from('broadcasts')
-    .select('id, template_name, template_language')
+    .select('id, template_name, template_language, header_media_url')
     .eq('id', broadcastId)
     .eq('account_id', accountId)
     .maybeSingle();
@@ -239,6 +239,9 @@ export async function planBroadcastResume(
     phoneNumberId: config.phone_number_id,
     accessToken: decrypt(config.access_token),
     templateRow: resolvedTemplate.row,
+    messageParams: broadcast.header_media_url
+      ? { headerMediaUrl: broadcast.header_media_url }
+      : undefined,
     planned: slice.map((row) => ({
       recipientRowId: row.id,
       phone: sanitizePhoneForMeta(contactPhone(row) ?? ''),

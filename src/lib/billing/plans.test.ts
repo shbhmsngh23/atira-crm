@@ -185,6 +185,14 @@ describe('applyRazorpayEvent', () => {
     expect(update?.status).toBe('cancelled');
   });
 
+  it('ignores a non-activating event when no subscription is on file', () => {
+    // e.g. a workspace moved to a hand-granted plan after its old
+    // Razorpay subscription was cancelled, then a late event arrives.
+    const none = { razorpay_subscription_id: null };
+    expect(applyRazorpayEvent(none, { ...entity, status: 'cancelled' }, PLANS)).toBeNull();
+    expect(applyRazorpayEvent(none, { ...entity, status: 'pending' }, PLANS)).toBeNull();
+  });
+
   it('ignores created events and unknown plans', () => {
     expect(applyRazorpayEvent(null, { ...entity, status: 'created' }, PLANS)).toBeNull();
     expect(applyRazorpayEvent(null, { ...entity, plan_id: 'plan_other' }, PLANS)).toBeNull();

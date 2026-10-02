@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { ArrowLeft, Send, Loader2, Users, Save } from 'lucide-react';
+import { ArrowLeft, CalendarClock, Send, Loader2, Users, Save } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 interface AudienceConfig {
@@ -29,11 +29,20 @@ interface Step4Props {
   template: MessageTemplate;
   audience: AudienceConfig;
   onSend: () => void;
+  /**
+   * '' sends now; otherwise a `datetime-local` value (the viewer's local
+   * time) at which the server-side worker sends the broadcast.
+   */
+  scheduledAt: string;
+  onScheduledAtChange: (value: string) => void;
   onSaveDraft?: () => void;
   onBack: () => void;
   isProcessing: boolean;
   progress: number;
 }
+
+/** A schedule must be at least this far ahead. */
+const MIN_SCHEDULE_LEAD_MS = 2 * 60 * 1000;
 
 export function Step4ScheduleSend({
   name,
@@ -41,6 +50,8 @@ export function Step4ScheduleSend({
   template,
   audience,
   onSend,
+  scheduledAt,
+  onScheduledAtChange,
   onSaveDraft,
   onBack,
   isProcessing,
@@ -50,6 +61,16 @@ export function Step4ScheduleSend({
   const [showConfirm, setShowConfirm] = useState(false);
   const [estimatedReach, setEstimatedReach] = useState<number>(0);
   const [loadingReach, setLoadingReach] = useState(true);
+  const [mode, setMode] = useState<'now' | 'later'>(scheduledAt ? 'later' : 'now');
+
+  const isScheduled = mode === 'later';
+  // The worker runs about once a minute, so anything sooner than a few
+  // minutes out is effectively "now" and is better sent as such.
+  const scheduleValid =
+    !isScheduled ||
+    (scheduledAt !== '' && Date.parse(scheduledAt) >= Date.now() + MIN_SCHEDULE_LEAD_MS);
+  const scheduledLabel =
+    isScheduled && scheduledAt ? new Date(scheduledAt).toLocaleString() : '';
 
   useEffect(() => {
     async function calculateReach() {
@@ -144,13 +165,60 @@ export function Step4ScheduleSend({
         </div>
       </div>
 
+      {/* When to send */}
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-foreground">{t('scheduleSend.when')}</p>
+        <div role="radiogroup" className="flex flex-wrap gap-2">
+          {(['now', 'later'] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              role="radio"
+              aria-checked={mode === m}
+              disabled={isProcessing}
+              onClick={() => {
+                setMode(m);
+                if (m === 'now') onScheduledAtChange('');
+              }}
+              className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
+                mode === m
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {m === 'now' ? t('scheduleSend.now') : t('scheduleSend.later')}
+            </button>
+          ))}
+        </div>
+        {isScheduled ? (
+          <div>
+            <label htmlFor="broadcast-schedule-at" className="mb-1.5 block text-xs text-muted-foreground">
+              {t('scheduleSend.at')}
+            </label>
+            <Input
+              id="broadcast-schedule-at"
+              type="datetime-local"
+              value={scheduledAt}
+              onChange={(e) => onScheduledAtChange(e.target.value)}
+              disabled={isProcessing}
+              className="w-full border-border bg-muted text-foreground sm:w-64"
+            />
+            {!scheduleValid ? (
+              <p className="mt-1.5 text-xs text-destructive">{t('scheduleSend.inPast')}</p>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+
       {/* Processing overlay */}
       {isProcessing && (
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
           <div className="mb-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              <p className="text-sm font-medium text-foreground">{t('scheduleSend.sending')}</p>
+              <p className="text-sm font-medium text-foreground">
+                {isScheduled ? t('scheduleSend.scheduling') : t('scheduleSend.sending')}
+              </p>
             </div>
             <span className="text-xs font-medium text-primary">{progress}%</span>
           </div>
@@ -191,25 +259,36 @@ export function Step4ScheduleSend({
           <DialogTrigger
             render={
               <Button
-                disabled={!name.trim() || isProcessing}
+                disabled={!name.trim() || isProcessing || !scheduleValid}
                 className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
               />
             }
           >
-            <Send className="h-4 w-4" />
-            {t('scheduleSend.sendNow')}
+            {isScheduled ? <CalendarClock className="h-4 w-4" /> : <Send className="h-4 w-4" />}
+            {isScheduled ? t('scheduleSend.schedule') : t('scheduleSend.sendNow')}
           </DialogTrigger>
           <DialogContent className="border-border bg-popover sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-popover-foreground">{t('scheduleSend.confirmTitle')}</DialogTitle>
+              <DialogTitle className="text-popover-foreground">
+                {isScheduled ? t('scheduleSend.confirmScheduleTitle') : t('scheduleSend.confirmTitle')}
+              </DialogTitle>
               <DialogDescription className="text-muted-foreground">
-                {t.rich('scheduleSend.confirmDesc', {
-                  count: estimatedReach,
-                  template: template.name,
-                  b: (chunks) => (
-                    <span className="font-medium text-popover-foreground">{chunks}</span>
-                  ),
-                })}
+                {isScheduled
+                  ? t.rich('scheduleSend.confirmScheduleDesc', {
+                      count: estimatedReach,
+                      template: template.name,
+                      date: scheduledLabel,
+                      b: (chunks) => (
+                        <span className="font-medium text-popover-foreground">{chunks}</span>
+                      ),
+                    })
+                  : t.rich('scheduleSend.confirmDesc', {
+                      count: estimatedReach,
+                      template: template.name,
+                      b: (chunks) => (
+                        <span className="font-medium text-popover-foreground">{chunks}</span>
+                      ),
+                    })}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -227,8 +306,8 @@ export function Step4ScheduleSend({
                 }}
                 className="bg-primary text-primary-foreground hover:bg-primary/90"
               >
-                <Send className="h-4 w-4" />
-                {t('scheduleSend.sendNow')}
+                {isScheduled ? <CalendarClock className="h-4 w-4" /> : <Send className="h-4 w-4" />}
+                {isScheduled ? t('scheduleSend.schedule') : t('scheduleSend.sendNow')}
               </Button>
             </DialogFooter>
           </DialogContent>
