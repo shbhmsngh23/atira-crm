@@ -58,7 +58,7 @@ export async function POST(
     if (!UUID_RE.test(id))
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-    const limit = checkRateLimit(
+    const limit = await checkRateLimit(
       `platformAdmin:${actor.userId}`,
       RATE_LIMITS.adminAction
     );

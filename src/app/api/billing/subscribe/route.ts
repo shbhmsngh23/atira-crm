@@ -35,7 +35,7 @@ export async function POST(request: Request) {
   try {
     const ctx = await requireRole('admin');
 
-    const limit = checkRateLimit(`admin:billingSubscribe:${ctx.userId}`, RATE_LIMITS.adminAction);
+    const limit = await checkRateLimit(`admin:billingSubscribe:${ctx.userId}`, RATE_LIMITS.adminAction);
     if (!limit.success) return rateLimitResponse(limit);
 
     const body = (await request.json().catch(() => null)) as {

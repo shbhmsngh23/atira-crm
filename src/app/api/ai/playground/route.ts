@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     const { supabase, accountId, userId } = await requireRole('agent')
     await requireFeature({ supabase, accountId }, 'ai')
 
-    const limit = checkRateLimit(`ai-playground:${userId}`, RATE_LIMITS.aiDraft)
+    const limit = await checkRateLimit(`ai-playground:${userId}`, RATE_LIMITS.aiDraft)
     if (!limit.success) return rateLimitResponse(limit)
 
     const body = await request.json().catch(() => null)

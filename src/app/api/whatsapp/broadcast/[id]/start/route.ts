@@ -28,7 +28,7 @@ export async function POST(
     const { supabase, accountId, userId } = await requireRole('agent');
     await requireUsableSubscription({ supabase, accountId });
 
-    const limit = checkRateLimit(`broadcast-start:${userId}`, RATE_LIMITS.broadcast);
+    const limit = await checkRateLimit(`broadcast-start:${userId}`, RATE_LIMITS.broadcast);
     if (!limit.success) return rateLimitResponse(limit);
 
     const { id } = await params;

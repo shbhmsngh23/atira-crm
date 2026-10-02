@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   try {
     const ctx = await getCurrentAccount();
 
-    const limit = checkRateLimit(`workspace:leave:${ctx.userId}`, RATE_LIMITS.adminAction);
+    const limit = await checkRateLimit(`workspace:leave:${ctx.userId}`, RATE_LIMITS.adminAction);
     if (!limit.success) return rateLimitResponse(limit);
 
     const accountId = await readAccountId(request);

@@ -73,7 +73,7 @@ export async function POST(request: Request) {
     const { supabase, accountId, userId } = await requireRole('admin')
     await requireFeature({ supabase, accountId }, 'ai')
 
-    const limit = checkRateLimit(`ai-config:${userId}`, RATE_LIMITS.adminAction)
+    const limit = await checkRateLimit(`ai-config:${userId}`, RATE_LIMITS.adminAction)
     if (!limit.success) return rateLimitResponse(limit)
 
     const body = await request.json().catch(() => null)

@@ -77,3 +77,12 @@ docker run -d --env-file .env.local -e PORT=3000 -p 3000:3000 wacrm
     its first ~4.5 minutes of sending, then shows Resume.
   - `GET /api/automations/cron` — automation Wait steps.
   - `GET /api/flows/cron` — flow timeouts.
+
+## Running more than one container
+
+Request rate limits are counted in each container's memory unless Redis
+is configured, so with several containers each one enforces its own
+copy of every limit. Set `UPSTASH_REDIS_REST_URL` and
+`UPSTASH_REDIS_REST_TOKEN` (see `.env.local.example`) on every container
+to share one count. If Redis becomes unreachable, each container falls
+back to its own in-memory limits rather than failing requests.
