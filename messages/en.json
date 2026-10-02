@@ -17,7 +17,7 @@
     "linkInvalid": "That link couldn’t be used to sign you in. If you were confirming your email, it may already be verified — just sign in below. For a password reset, request a new link and open it in the same browser you requested it from."
   },
   "Sidebar": {
-    "title": "CRM Template for WhatsApp",
+    "title": "Atira CRM",
     "primaryNav": "Primary",
     "dashboard": "Dashboard",
     "inbox": "Inbox",
@@ -53,6 +53,9 @@
     "broadcasts": "Broadcasts",
     "automations": "Automations",
     "settings": "Settings",
+    "flows": "Flows",
+    "aiAgents": "AI Agents",
+    "platformAdmin": "Platform admin",
     "openMenu": "Open menu",
     "openAccountMenu": "Open account menu",
     "defaultUser": "User",
@@ -1580,6 +1583,14 @@
       "ownerHint": "Full control over account and billing"
     },
     "whatsapp": {
+      "embeddedTitle": "Connect with Facebook",
+      "embeddedDesc": "The quickest way: log in with Facebook, choose or create your WhatsApp Business Account and number, and Atira CRM connects it for you.",
+      "embeddedButton": "Connect WhatsApp",
+      "embeddedConnecting": "Connecting...",
+      "embeddedSuccess": "WhatsApp number connected",
+      "embeddedCancelled": "The signup was closed before it finished",
+      "embeddedFailed": "Couldn't connect the number",
+      "embeddedOr": "Or enter your API credentials by hand below.",
       "title": "WhatsApp connection",
       "description": "Connect your Meta WhatsApp Business API. Credentials, webhook, and setup steps all live here.",
       "tokenCorrupted": "Stored token can't be decrypted",
@@ -1923,7 +1934,7 @@
     "titleJoin": "Create account & join",
     "title": "Create account",
     "descJoin": "Verify your email, then accept the invitation to join your team.",
-    "desc": "Get started with CRM Template for WhatsApp",
+    "desc": "Get started with Atira CRM",
     "fullNameLabel": "Full name",
     "fullNamePlaceholder": "John Doe",
     "emailLabel": "Email",
@@ -2079,6 +2090,8 @@
   },
   "Billing": {
     "title": "Billing & plan",
+    "noPlanName": "No plan yet",
+    "noPlanHint": "Choose a plan below to start using this workspace.",
     "desc": "Your Atira CRM plan. WhatsApp conversation charges are billed by Meta directly to your WhatsApp Business Account.",
     "loading": "Loading billing details...",
     "loadFailed": "Couldn't load billing details",
@@ -2143,6 +2156,8 @@
   "BillingBanner": {
     "trialEnding": "{days, plural, one {Your free trial ends in # day} other {Your free trial ends in # days}}",
     "trialEndingBody": "Choose a plan to keep your inbox, broadcasts and automations running.",
+    "noPlanTitle": "This workspace doesn't have a plan yet",
+    "noPlanBody": "Choose a plan to start sending messages, broadcasts and automations. Incoming customer messages are already being saved.",
     "trialEndedTitle": "Your free trial has ended",
     "inactiveTitle": "Your workspace is paused",
     "inactiveBody": "Sending messages, broadcasts, automations, chatbot flows and AI replies are paused until you choose a plan. Incoming customer messages are still saved.",

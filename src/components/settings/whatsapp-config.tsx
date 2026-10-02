@@ -24,6 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
 import { SettingsPanelHead } from './settings-panel-head';
+import { EmbeddedSignupCard } from './embedded-signup-card';
 import {
   Accordion,
   AccordionItem,
@@ -738,6 +739,13 @@ export function WhatsAppConfig() {
             )}
           </Alert>
         )}
+
+        {/* One-click connect through Meta (hidden unless configured). */}
+        <EmbeddedSignupCard
+          onConnected={() => {
+            if (accountId) void fetchConfig(accountId);
+          }}
+        />
 
         {/* API Credentials */}
         <Card>

@@ -122,6 +122,22 @@ BEGIN
     RAISE EXCEPTION 'sync_active_membership trigger is missing — migration 046 did not apply';
   END IF;
 
+  -- Embedded Signup (047).
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'whatsapp_config'
+      AND column_name = 'registration_pin'
+  ) THEN
+    RAISE EXCEPTION 'whatsapp_config.registration_pin is missing — migration 047 did not apply';
+  END IF;
+
+  -- API role grants (048). Without them every signed-in request fails
+  -- with "permission denied for table profiles" on newer Supabase stacks.
+  IF NOT has_table_privilege('authenticated', 'public.profiles', 'SELECT')
+     OR NOT has_table_privilege('service_role', 'public.account_subscriptions', 'UPDATE') THEN
+    RAISE EXCEPTION 'authenticated / service_role lack table grants — migration 048 did not apply';
+  END IF;
+
   RAISE NOTICE 'schema verification passed';
 END
 $$;

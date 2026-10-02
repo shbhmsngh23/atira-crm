@@ -22,6 +22,7 @@ const TRIAL_WARNING_DAYS = 3;
 interface BillingSummary {
   usable: boolean;
   trialDaysLeft: number | null;
+  hadTrial: boolean;
   subscription: { status: SubscriptionStatus; suspended_at: string | null };
 }
 
@@ -71,6 +72,9 @@ export function BillingBanner() {
   if (subscription.suspended_at) {
     title = t('suspendedTitle');
     body = t('suspendedBody');
+  } else if (!usable && subscription.status === 'trialing' && !summary.hadTrial) {
+    title = t('noPlanTitle');
+    body = t('noPlanBody');
   } else if (!usable) {
     title =
       subscription.status === 'trialing'

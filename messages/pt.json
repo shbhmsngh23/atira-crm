@@ -17,7 +17,7 @@
     "linkInvalid": "Não foi possível entrar com esse link. Se estava confirmando seu e-mail, ele já pode estar verificado — basta entrar abaixo. Para redefinir a senha, peça um novo link e abra-o no mesmo navegador em que o solicitou."
   },
   "Sidebar": {
-    "title": "Modelo de CRM para WhatsApp",
+    "title": "Atira CRM",
     "primaryNav": "Principal",
     "dashboard": "Painel",
     "inbox": "Caixa de entrada",
@@ -53,6 +53,9 @@
     "broadcasts": "Disparos",
     "automations": "Automações",
     "settings": "Configurações",
+    "flows": "Fluxos",
+    "aiAgents": "Agentes de IA",
+    "platformAdmin": "Administração da plataforma",
     "openMenu": "Abrir menu",
     "openAccountMenu": "Abrir menu da conta",
     "defaultUser": "Usuário",
@@ -1570,6 +1573,14 @@
       "ownerHint": "Controle total da conta e do faturamento"
     },
     "whatsapp": {
+      "embeddedTitle": "Conectar com o Facebook",
+      "embeddedDesc": "O jeito mais rápido: entre com o Facebook, escolha ou crie sua conta do WhatsApp Business e seu número, e o Atira CRM faz a conexão para você.",
+      "embeddedButton": "Conectar WhatsApp",
+      "embeddedConnecting": "Conectando...",
+      "embeddedSuccess": "Número do WhatsApp conectado",
+      "embeddedCancelled": "O cadastro foi fechado antes de terminar",
+      "embeddedFailed": "Não foi possível conectar o número",
+      "embeddedOr": "Ou insira suas credenciais de API manualmente abaixo.",
       "title": "Conexão com o WhatsApp",
       "description": "Conecte sua API do WhatsApp Business da Meta. Credenciais, webhook e etapas de configuração ficam todos aqui.",
       "tokenCorrupted": "Não foi possível descriptografar o token armazenado",
@@ -1911,7 +1922,7 @@
     "titleJoin": "Criar conta e entrar na equipe",
     "title": "Criar conta",
     "descJoin": "Confirme seu e-mail e depois aceite o convite para entrar na sua equipe.",
-    "desc": "Comece a usar o Modelo de CRM para WhatsApp",
+    "desc": "Comece a usar o Atira CRM",
     "fullNameLabel": "Nome completo",
     "fullNamePlaceholder": "João Silva",
     "emailLabel": "E-mail",
@@ -2067,6 +2078,8 @@
   },
   "Billing": {
     "title": "Cobrança e plano",
+    "noPlanName": "Ainda sem plano",
+    "noPlanHint": "Escolha um plano abaixo para começar a usar este espaço de trabalho.",
     "desc": "Seu plano do Atira CRM. As cobranças de conversas do WhatsApp são feitas pela Meta diretamente na sua conta do WhatsApp Business.",
     "loading": "Carregando dados de cobrança...",
     "loadFailed": "Não foi possível carregar os dados de cobrança",
@@ -2131,6 +2144,8 @@
   "BillingBanner": {
     "trialEnding": "{days, plural, one {Seu teste grátis termina em # dia} other {Seu teste grátis termina em # dias}}",
     "trialEndingBody": "Escolha um plano para manter sua caixa de entrada, disparos e automações funcionando.",
+    "noPlanTitle": "Este espaço de trabalho ainda não tem plano",
+    "noPlanBody": "Escolha um plano para começar a enviar mensagens, disparos e automações. As mensagens recebidas dos clientes já estão sendo salvas.",
     "trialEndedTitle": "Seu teste grátis terminou",
     "inactiveTitle": "Seu espaço de trabalho está pausado",
     "inactiveBody": "O envio de mensagens, os disparos, as automações, os fluxos de chatbot e as respostas com IA estão pausados até você escolher um plano. As mensagens recebidas dos clientes continuam sendo salvas.",
