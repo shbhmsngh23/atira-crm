@@ -16,6 +16,7 @@
 [![CI](https://github.com/shbhmsngh23/atira-crm/actions/workflows/ci.yml/badge.svg)](https://github.com/shbhmsngh23/atira-crm/actions/workflows/ci.yml)
 [![Next.js 16](https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs)](https://nextjs.org)
 [![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20Auth-3ecf8e?logo=supabase)](https://supabase.com)
+[![Stars](https://img.shields.io/github/stars/shbhmsngh23/atira-crm?style=social)](https://github.com/shbhmsngh23/atira-crm/stargazers)
 
 The marketing site and self-host docs live in a separate repo:
 [ArnasDon/wacrm-site](https://github.com/ArnasDon/wacrm-site)
