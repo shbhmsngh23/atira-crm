@@ -51,20 +51,26 @@ async function searchAccountIds(q: string): Promise<string[]> {
   const admin = supabaseAdmin();
   const [byName, byEmail] = await Promise.all([
     admin.from('accounts').select('id').ilike('name', `%${q}%`).limit(200),
-    admin
-      .from('profiles')
-      .select('account_id')
-      .ilike('email', `%${q}%`)
-      .limit(200),
+    admin.from('profiles').select('user_id').ilike('email', `%${q}%`).limit(200),
   ]);
-  if (byName.error)
-    throw new Error(`Account search failed: ${byName.error.message}`);
-  if (byEmail.error)
-    throw new Error(`Account search failed: ${byEmail.error.message}`);
+  if (byName.error) throw new Error(`Account search failed: ${byName.error.message}`);
+  if (byEmail.error) throw new Error(`Account search failed: ${byEmail.error.message}`);
+
   const ids = new Set<string>();
   for (const r of byName.data ?? []) ids.add(r.id as string);
-  for (const r of byEmail.data ?? [])
-    if (r.account_id) ids.add(r.account_id as string);
+
+  // A member may belong to several workspaces (migration 046).
+  const userIds = (byEmail.data ?? []).map((r) => r.user_id as string);
+  if (userIds.length > 0) {
+    const { data, error } = await admin
+      .from('account_memberships')
+      .select('account_id')
+      .in('user_id', userIds)
+      .limit(500);
+    if (error) throw new Error(`Account search failed: ${error.message}`);
+    for (const r of data ?? []) ids.add(r.account_id as string);
+  }
+
   if (UUID_RE.test(q)) ids.add(q.toLowerCase());
   return [...ids];
 }
@@ -148,14 +154,14 @@ export async function listAccounts(input: {
   if (!subs || subs.length === 0) return { accounts: [], total: count ?? 0 };
 
   const ids = subs.map((s) => s.account_id);
-  const [accounts, profiles, configs, plans] = await Promise.all([
+  const [accounts, memberships, configs, plans] = await Promise.all([
     admin
       .from('accounts')
       .select('id, name, owner_user_id, created_at')
       .in('id', ids),
     admin
-      .from('profiles')
-      .select('user_id, account_id, email')
+      .from('account_memberships')
+      .select('account_id')
       .in('account_id', ids),
     admin
       .from('whatsapp_config')
@@ -163,9 +169,17 @@ export async function listAccounts(input: {
       .in('account_id', ids),
     admin.from('plans').select('id, name'),
   ]);
-  for (const r of [accounts, profiles, configs, plans]) {
+  for (const r of [accounts, memberships, configs, plans]) {
     if (r.error) throw new Error(`Account list failed: ${r.error.message}`);
   }
+
+  const ownerIds = [
+    ...new Set((accounts.data ?? []).map((a) => a.owner_user_id as string)),
+  ];
+  const owners = ownerIds.length
+    ? await admin.from('profiles').select('user_id, email').in('user_id', ownerIds)
+    : { data: [], error: null };
+  if (owners.error) throw new Error(`Account list failed: ${owners.error.message}`);
 
   const accountById = new Map(
     (accounts.data ?? []).map((a) => [
@@ -182,12 +196,11 @@ export async function listAccounts(input: {
     (plans.data ?? []).map((p) => [p.id as string, p.name as string])
   );
   const members = new Map<string, number>();
+  for (const m of memberships.data ?? []) {
+    members.set(m.account_id as string, (members.get(m.account_id as string) ?? 0) + 1);
+  }
   const emailByUser = new Map<string, string | null>();
-  for (const p of profiles.data ?? []) {
-    members.set(
-      p.account_id as string,
-      (members.get(p.account_id as string) ?? 0) + 1
-    );
+  for (const p of owners.data ?? []) {
     emailByUser.set(p.user_id as string, (p.email as string | null) ?? null);
   }
   const connected = new Set(
@@ -263,10 +276,10 @@ export async function loadAccountDetail(accountId: string) {
         .eq('account_id', accountId)
         .maybeSingle<Subscription>(),
       admin
-        .from('profiles')
-        .select('user_id, full_name, email, account_role')
+        .from('account_memberships')
+        .select('user_id, role')
         .eq('account_id', accountId)
-        .order('account_role'),
+        .order('role'),
       admin
         .from('whatsapp_config')
         .select('status, phone_number_id, waba_id, connected_at')
@@ -290,11 +303,31 @@ export async function loadAccountDetail(accountId: string) {
   }
   if (!account.data || !subscription.data) return null;
 
+  const memberRows = (members.data ?? []) as { user_id: string; role: string }[];
+  const { data: profiles, error: profileErr } = memberRows.length
+    ? await admin
+        .from('profiles')
+        .select('user_id, full_name, email')
+        .in(
+          'user_id',
+          memberRows.map((m) => m.user_id)
+        )
+    : { data: [], error: null };
+  if (profileErr) throw new Error(`Account detail failed: ${profileErr.message}`);
+  const profileById = new Map(
+    (profiles ?? []).map((p) => [p.user_id as string, p as { full_name: string | null; email: string | null }])
+  );
+
   return {
     account: account.data,
     subscription: subscription.data,
     state: accountState(subscription.data),
-    members: members.data ?? [],
+    members: memberRows.map((m) => ({
+      user_id: m.user_id,
+      full_name: profileById.get(m.user_id)?.full_name ?? null,
+      email: profileById.get(m.user_id)?.email ?? null,
+      account_role: m.role,
+    })),
     whatsapp: config.data,
     audit: audit.data ?? [],
     billingEvents: events.data ?? [],

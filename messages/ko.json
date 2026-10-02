@@ -1979,7 +1979,7 @@
       "serverErrorTitle": "문제가 발생했습니다",
       "serverErrorBody": "지금은 이 초대를 확인할 수 없습니다. 잠시 후 페이지를 새로 고쳐 보세요."
     },
-    "conflictDefault": "이미 다른 계정에 속해 있습니다. 이 계정에 참여하려면 다른 이메일로 로그인하세요.",
+    "conflictDefault": "이미 이 워크스페이스의 멤버입니다.",
     "acceptFailed": "초대를 수락하지 못했습니다",
     "welcome": "팀에 오신 것을 환영합니다",
     "serverUnreachable": "서버에 연결할 수 없습니다",
@@ -1992,9 +1992,9 @@
     "joinAs": "<badge>{role}</badge> 역할로 참여합니다. 링크는 {date}까지 유효합니다.",
     "accepting": "수락 중…",
     "acceptInvitation": "초대 수락",
-    "acceptNote": "수락하면 로그인 계정이 {name}으로 이동합니다. 가입 시 만들어진 빈 개인 계정은 정리됩니다.",
-    "conflictTitle": "이 계정으로는 {name}에 참여할 수 없습니다",
-    "conflictBody": "<account>{name}</account>에 참여하려면 로그아웃한 뒤 다른 이메일 주소로 다시 가입하세요. 초대 링크는 만료되지 않은 한 계속 유효합니다.",
+    "acceptNote": "수락하면 {name}이(가) 워크스페이스 목록에 추가되고 해당 워크스페이스로 전환됩니다. 사이드바의 워크스페이스 메뉴에서 언제든 다시 전환할 수 있습니다.",
+    "conflictTitle": "이미 {name}에 속해 있습니다",
+    "conflictBody": "사이드바 하단의 워크스페이스 메뉴에서 <account>{name}</account>(으)로 전환하세요. 다른 로그인으로 참여하려면 로그아웃한 뒤 다른 이메일을 사용하세요.",
     "staySignedIn": "로그인 유지",
     "signingOut": "로그아웃 중…",
     "signOutSwitch": "로그아웃 후 다른 이메일 사용",
@@ -2151,5 +2151,22 @@
     "suspendedTitle": "이 워크스페이스는 정지되었습니다",
     "suspendedBody": "메시지 전송, 브로드캐스트, 자동화, 챗봇 플로우, AI 답장이 일시 중지되었습니다. 고객이 보낸 메시지는 계속 저장됩니다. 접근을 복구하려면 지원팀에 문의하세요.",
     "choosePlan": "요금제 선택"
+  },
+  "WorkspaceSwitcher": {
+    "label": "워크스페이스",
+    "create": "워크스페이스 만들기",
+    "createTitle": "새 워크스페이스",
+    "createDesc": "자체 WhatsApp 번호, 연락처, 팀, 요금제를 가진 별도의 워크스페이스입니다. 예를 들어 관리하는 고객용으로 사용할 수 있습니다. 새 워크스페이스에는 무료 체험이 포함되지 않습니다.",
+    "nameLabel": "워크스페이스 이름",
+    "namePlaceholder": "예: 고객 이름",
+    "createButton": "만들기",
+    "cancel": "취소",
+    "leave": "이 워크스페이스 나가기",
+    "leaveTitle": "{name}에서 나갈까요?",
+    "leaveDesc": "다시 초대받을 때까지 이 워크스페이스에 접근할 수 없습니다.",
+    "leaveConfirm": "나가기",
+    "switchFailed": "워크스페이스를 전환하지 못했습니다",
+    "createFailed": "워크스페이스를 만들지 못했습니다",
+    "leaveFailed": "워크스페이스에서 나가지 못했습니다"
   }
 }

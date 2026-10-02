@@ -69,3 +69,8 @@ jobs:
       # just the absence of an error.
       - name: Verify the resulting schema
         run: supabase db query --local --file supabase/ci/verify-schema.sql
+
+      # Behaviour, not just shape: sign up users through the real
+      # trigger and drive the workspace-membership RPCs as each of them.
+      - name: Test workspace membership
+        run: supabase db query --local --file supabase/ci/test-workspaces.sql

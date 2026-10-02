@@ -112,6 +112,16 @@ BEGIN
     RAISE EXCEPTION 'broadcasts.header_media_url is missing — migration 045 did not apply';
   END IF;
 
+  -- Multi-workspace membership (046).
+  IF to_regclass('public.account_memberships') IS NULL THEN
+    RAISE EXCEPTION 'public.account_memberships is missing — migration 046 did not apply';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger WHERE tgname = 'sync_active_membership' AND NOT tgisinternal
+  ) THEN
+    RAISE EXCEPTION 'sync_active_membership trigger is missing — migration 046 did not apply';
+  END IF;
+
   RAISE NOTICE 'schema verification passed';
 END
 $$;

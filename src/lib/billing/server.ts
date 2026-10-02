@@ -143,7 +143,7 @@ export async function countUsage(
   // a workspace can't hand out more links than it has seats.
   const [members, invites] = await Promise.all([
     admin
-      .from('profiles')
+      .from('account_memberships')
       .select('user_id', { count: 'exact', head: true })
       .eq('account_id', accountId),
     admin
