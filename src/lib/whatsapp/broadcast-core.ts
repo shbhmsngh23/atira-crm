@@ -18,7 +18,8 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-import { sendTemplateMessage } from '@/lib/whatsapp/meta-api';
+import { MetaApiError, sendTemplateMessage } from '@/lib/whatsapp/meta-api';
+import type { SendTimeParams } from '@/lib/whatsapp/template-send-builder';
 import { decrypt } from '@/lib/whatsapp/encryption';
 import {
   parseInternationalPhone,
@@ -55,7 +56,7 @@ export interface CreateBroadcastParams {
   recipients: BroadcastRecipientInput[];
 }
 
-interface PlannedRecipient {
+export interface PlannedRecipient {
   recipientRowId: string;
   phone: string;
   params: string[];
@@ -68,6 +69,8 @@ export interface BroadcastPlan {
   phoneNumberId: string;
   accessToken: string;
   templateRow: MessageTemplate | null;
+  /** Same for every recipient, e.g. the media for an image header. */
+  messageParams?: SendTimeParams;
   planned: PlannedRecipient[];
   /** Phones rejected up front (invalid E.164) — counted as failed. */
   rejected: number;
@@ -246,70 +249,120 @@ export async function createBroadcast(
 }
 
 /**
- * Fan out a {@link BroadcastPlan}: send each recipient's template
- * (phone-variant retry) and stamp its `broadcast_recipients` row.
- * Best-effort per recipient — one failure never aborts the rest.
- * Designed to run inside `after()`.
+ * Meta error codes that mean "slow down" rather than "this recipient
+ * can't be messaged": throughput (130429), WABA / app rate limits
+ * (80007, 4, 613) and the spam rate limit (131048). A recipient that
+ * hits one is left `pending` so a later pass sends it, instead of
+ * being written off as failed.
+ */
+const THROTTLE_CODES = new Set([4, 613, 80007, 130429, 131048]);
+
+export function isThrottleError(err: unknown): boolean {
+  if (err instanceof MetaApiError) {
+    return (err.code !== null && THROTTLE_CODES.has(err.code)) || err.httpStatus === 429;
+  }
+  return false;
+}
+
+/** Everything a send needs that is the same for every recipient. */
+export type BroadcastSendContext = Pick<
+  BroadcastPlan,
+  | 'phoneNumberId'
+  | 'accessToken'
+  | 'templateName'
+  | 'templateLanguage'
+  | 'templateRow'
+  | 'messageParams'
+>;
+
+export type RecipientOutcome = 'sent' | 'failed' | 'throttled';
+
+/**
+ * Send one recipient's template (with phone-variant retry) and stamp
+ * its row. A throttled send leaves the row untouched (`pending`).
+ */
+export async function sendBroadcastRecipient(
+  db: SupabaseClient,
+  ctx: BroadcastSendContext,
+  recipient: PlannedRecipient
+): Promise<RecipientOutcome> {
+  const variants = phoneVariants(recipient.phone);
+  let sentMessageId: string | null = null;
+  let lastError: string | null = null;
+
+  for (const variant of variants) {
+    try {
+      const result = await sendTemplateMessage({
+        phoneNumberId: ctx.phoneNumberId,
+        accessToken: ctx.accessToken,
+        to: variant,
+        templateName: ctx.templateName,
+        language: ctx.templateLanguage,
+        template: ctx.templateRow ?? undefined,
+        messageParams: ctx.messageParams,
+        params: recipient.params,
+      });
+      sentMessageId = result.messageId;
+      lastError = null;
+      break;
+    } catch (error) {
+      if (isThrottleError(error)) return 'throttled';
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      lastError = message;
+      // Only a "recipient not allowed" error is worth another variant.
+      if (!isRecipientNotAllowedError(message)) break;
+    }
+  }
+
+  if (sentMessageId) {
+    await db
+      .from('broadcast_recipients')
+      .update({
+        status: 'sent',
+        sent_at: new Date().toISOString(),
+        whatsapp_message_id: sentMessageId,
+        error_message: null,
+      })
+      .eq('id', recipient.recipientRowId);
+    return 'sent';
+  }
+
+  await db
+    .from('broadcast_recipients')
+    .update({
+      status: 'failed',
+      error_message: lastError || 'Unknown error',
+    })
+    .eq('id', recipient.recipientRowId);
+  return 'failed';
+}
+
+/**
+ * Deliver every planned recipient, then finalize the broadcast.
  *
- * The per-status count columns on `broadcasts` are owned by the DB
+ * Aggregate counts (`sent_count`, `failed_count`, …) are owned by the
  * aggregate trigger (migrations 003/005): each recipient-row update
- * below advances them automatically, and later Meta delivery/read
- * webhooks keep advancing them. We therefore never write those columns
- * here — only the terminal `status` — otherwise a manual value would
- * race and clobber the trigger-maintained counts.
+ * advances them automatically, and later Meta delivery/read webhooks
+ * keep advancing them. We therefore never write those columns here —
+ * only the terminal `status` — otherwise a manual value would race and
+ * clobber the trigger-maintained counts.
+ *
+ * Stops at the first throttled send: the rest stay `pending`, the
+ * broadcast stays `sending`, and the broadcast worker
+ * (src/lib/whatsapp/broadcast-queue.ts) picks them up on its next run.
  */
 export async function deliverBroadcast(
   db: SupabaseClient,
   plan: BroadcastPlan
 ): Promise<void> {
   for (const recipient of plan.planned) {
-    const variants = phoneVariants(recipient.phone);
-    let sentMessageId: string | null = null;
-    let lastError: string | null = null;
-
-    for (const variant of variants) {
-      try {
-        const result = await sendTemplateMessage({
-          phoneNumberId: plan.phoneNumberId,
-          accessToken: plan.accessToken,
-          to: variant,
-          templateName: plan.templateName,
-          language: plan.templateLanguage,
-          template: plan.templateRow ?? undefined,
-          params: recipient.params,
-        });
-        sentMessageId = result.messageId;
-        lastError = null;
-        break;
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        lastError = message;
-        // Only a "recipient not allowed" error is worth another variant.
-        if (!isRecipientNotAllowedError(message)) break;
-      }
-    }
-
-    if (sentMessageId) {
-      await db
-        .from('broadcast_recipients')
-        .update({
-          status: 'sent',
-          sent_at: new Date().toISOString(),
-          whatsapp_message_id: sentMessageId,
-          error_message: null,
-        })
-        .eq('id', recipient.recipientRowId);
-    } else {
-      await db
-        .from('broadcast_recipients')
-        .update({
-          status: 'failed',
-          error_message: lastError || 'Unknown error',
-        })
-        .eq('id', recipient.recipientRowId);
-    }
+    const outcome = await sendBroadcastRecipient(db, plan, recipient);
+    if (outcome === 'throttled') break;
   }
-
+  await db
+    .from('broadcasts')
+    .update({ updated_at: new Date().toISOString() })
+    .eq('id', plan.broadcastId);
   await finalizeBroadcastStatus(db, plan.broadcastId);
 }
 

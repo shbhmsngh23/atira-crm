@@ -68,9 +68,12 @@ docker run -d --env-file .env.local -e PORT=3000 -p 3000:3000 wacrm
   Attachment Storage; attachments received while it's off become
   unviewable once Meta drops them. Files over 16 MB (the bucket's
   limit) are never copied.
-- Nothing inside the container is scheduled. If you use automation
-  Wait steps or flows, point an external scheduler at
-  `GET /api/automations/cron` and `GET /api/flows/cron` on this
-  deployment, sending the shared secret in the `x-cron-secret` header
-  (`AUTOMATION_CRON_SECRET`, see `.env.local.example`). Both return
-  503 until that variable is set.
+- Nothing inside the container is scheduled. Point an external
+  scheduler at these endpoints every minute, sending the shared secret
+  in the `x-cron-secret` header (`AUTOMATION_CRON_SECRET`, see
+  `.env.local.example`). All return 503 until that variable is set.
+  - `GET /api/broadcasts/cron` — starts scheduled broadcasts and
+    finishes large ones. Without it, a broadcast only gets as far as
+    its first ~4.5 minutes of sending, then shows Resume.
+  - `GET /api/automations/cron` — automation Wait steps.
+  - `GET /api/flows/cron` — flow timeouts.

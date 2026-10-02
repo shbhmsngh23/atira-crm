@@ -435,7 +435,10 @@ export interface Broadcast {
    * send. Added in migration 038.
    */
   delivery_locked_at?: string | null;
+  /** Image / video / document for a media-header template (migration 045). */
+  header_media_url?: string | null;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface BroadcastRecipient {

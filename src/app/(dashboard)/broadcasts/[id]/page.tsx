@@ -144,6 +144,15 @@ function downloadBlob(filename: string, content: string) {
   URL.revokeObjectURL(url);
 }
 
+/** How often the page refreshes while a broadcast is sending. */
+const SENDING_REFRESH_MS = 5000;
+
+/**
+ * No progress for this long means the server-side worker isn't moving
+ * the broadcast. Comfortably above the worker's per-minute cadence.
+ */
+const STALLED_AFTER_MS = 10 * 60 * 1000;
+
 export default function BroadcastDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -195,6 +204,15 @@ export default function BroadcastDetailPage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // While the server is sending, refresh so progress shows without a
+  // reload. Stops once the broadcast settles.
+  const isSending = broadcast?.status === 'sending';
+  useEffect(() => {
+    if (!isSending) return;
+    const timer = setInterval(() => void fetchData(), SENDING_REFRESH_MS);
+    return () => clearInterval(timer);
+  }, [isSending, fetchData]);
 
   const filteredRecipients = useMemo(
     () =>
@@ -321,10 +339,20 @@ export default function BroadcastDetailPage() {
 
   const pendingCount = recipients.filter((r) => r.status === 'pending').length;
   const retryableCount = recipients.filter((r) => r.status === 'failed').length;
-  // A campaign whose tab went away sits in 'sending' with recipients
-  // still pending and nothing left to move them. Name that state rather
-  // than leaving a permanently pulsing "sending" badge.
-  const isStalled = broadcast.status === 'sending' && pendingCount > 0;
+  // The server-side worker bumps `updated_at` as it goes. A 'sending'
+  // broadcast with recipients still pending and no progress for a while
+  // has stopped (e.g. the scheduled worker isn't configured); name that
+  // state and offer Resume rather than a permanently pulsing badge.
+  const lastProgress = Date.parse(broadcast.updated_at ?? broadcast.created_at);
+  const isStalled =
+    broadcast.status === 'sending' &&
+    pendingCount > 0 &&
+    Date.now() - lastProgress > STALLED_AFTER_MS;
+  const isSendingInBackground =
+    broadcast.status === 'sending' && pendingCount > 0 && !isStalled;
+  // Retrying failed recipients waits until this pass is over.
+  const canRetryFailed =
+    retryableCount > 0 && broadcast.status !== 'sending' && broadcast.status !== 'scheduled';
 
   const funnelSteps: FunnelStep[] = [
     { label: t('stats.sent'), value: broadcast.sent_count, color: 'bg-primary' },
@@ -409,9 +437,33 @@ export default function BroadcastDetailPage() {
         )}
       </div>
 
+      {broadcast.status === 'scheduled' && broadcast.scheduled_at ? (
+        <div className="rounded-xl border border-border bg-card p-4 text-sm">
+          <p className="font-medium text-foreground">
+            {t('scheduledFor', { date: new Date(broadcast.scheduled_at).toLocaleString() })}
+          </p>
+          <p className="mt-0.5 text-muted-foreground">{t('scheduledHint')}</p>
+        </div>
+      ) : null}
+
+      {isSendingInBackground ? (
+        <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 text-sm">
+          <Loader2 className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" />
+          <div>
+            <p className="font-medium text-foreground">
+              {t('sendingInBackground', {
+                done: recipients.length - pendingCount,
+                total: recipients.length,
+              })}
+            </p>
+            <p className="mt-0.5 text-muted-foreground">{t('sendingInBackgroundHint')}</p>
+          </div>
+        </div>
+      ) : null}
+
       {/* Resume / retry (issue #472). Only rendered when there is
           actually something outstanding. */}
-      {(pendingCount > 0 || retryableCount > 0) && (
+      {(isStalled || canRetryFailed) && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4">
           <div className="text-sm">
             <p className="font-medium text-foreground">
@@ -424,7 +476,7 @@ export default function BroadcastDetailPage() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {pendingCount > 0 && (
+            {isStalled && (
               <Button
                 size="sm"
                 onClick={() => handleResume('pending')}
@@ -438,7 +490,7 @@ export default function BroadcastDetailPage() {
                 {t('resumePending', { count: pendingCount })}
               </Button>
             )}
-            {retryableCount > 0 && (
+            {canRetryFailed && (
               <Button
                 variant="outline"
                 size="sm"
