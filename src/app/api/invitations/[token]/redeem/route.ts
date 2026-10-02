@@ -1,16 +1,15 @@
 // ============================================================
 // POST /api/invitations/[token]/redeem
 //
-// Authenticated. Caller atomically moves from their personal
-// account (created at signup) to the inviter's account with the
-// invite's role. Heavy lifting lives in the SECURITY DEFINER
-// `redeem_invitation` RPC from migration 019.
+// Authenticated. Adds the inviter's workspace to the caller's
+// workspaces with the invite's role and switches them into it; they
+// keep any workspaces they already had. Heavy lifting lives in the
+// SECURITY DEFINER `redeem_invitation` RPC (migration 046).
 //
 // Refusal contract (from the RPC)
 //   - SQLSTATE 42501 → 401 (caller not authenticated)
 //   - SQLSTATE 22023 → 400 (invitation not_found / used / expired)
-//   - SQLSTATE 23505 → 409 (caller's account already has data /
-//     they're already in this or another shared account)
+//   - SQLSTATE 23505 → 409 (caller is already a member of it)
 //
 // Rate limit (per IP) is the same shape as peek but tighter —
 // a successful redeem changes data, and the RPC's data-loss
@@ -58,7 +57,7 @@ export async function POST(
   { params }: { params: Promise<{ token: string }> },
 ) {
   const ip = getClientIp(request);
-  const limit = checkRateLimit(`redeem:${ip}`, RATE_LIMITS.invitationRedeem);
+  const limit = await checkRateLimit(`redeem:${ip}`, RATE_LIMITS.invitationRedeem);
   if (!limit.success) return rateLimitResponse(limit);
 
   const { token } = await params;

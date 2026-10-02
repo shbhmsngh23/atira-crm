@@ -1979,7 +1979,7 @@
       "serverErrorTitle": "Something went wrong",
       "serverErrorBody": "We couldn't verify this invitation right now. Try refreshing the page in a moment."
     },
-    "conflictDefault": "You are already in another account. Sign in with a different email to join this one.",
+    "conflictDefault": "You are already a member of this workspace.",
     "acceptFailed": "Failed to accept invitation",
     "welcome": "Welcome to the team",
     "serverUnreachable": "Could not reach the server",
@@ -1992,9 +1992,9 @@
     "joinAs": "You'll join as <badge>{role}</badge>. Link valid until {date}.",
     "accepting": "Accepting…",
     "acceptInvitation": "Accept invitation",
-    "acceptNote": "Accepting moves your login into {name}. Your empty personal account from signup will be cleaned up.",
-    "conflictTitle": "Can't join {name} with this account",
-    "conflictBody": "To join <account>{name}</account>, sign out and sign up again with a different email address. The invite link stays valid as long as it hasn't expired.",
+    "acceptNote": "Accepting adds {name} to your workspaces and switches you into it. You can switch back any time from the workspace menu in the sidebar.",
+    "conflictTitle": "You're already in {name}",
+    "conflictBody": "Switch to <account>{name}</account> from the workspace menu at the bottom of the sidebar. To join with a different login instead, sign out and use another email.",
     "staySignedIn": "Stay signed in",
     "signingOut": "Signing out…",
     "signOutSwitch": "Sign out & use a different email",
@@ -2151,5 +2151,22 @@
     "suspendedTitle": "This workspace has been suspended",
     "suspendedBody": "Sending messages, broadcasts, automations, chatbot flows and AI replies are paused. Incoming customer messages are still saved. Contact support to restore access.",
     "choosePlan": "Choose a plan"
+  },
+  "WorkspaceSwitcher": {
+    "label": "Workspaces",
+    "create": "Create workspace",
+    "createTitle": "New workspace",
+    "createDesc": "A separate workspace with its own WhatsApp number, contacts, team and plan, for example for a client you manage. New workspaces don't include a free trial.",
+    "nameLabel": "Workspace name",
+    "namePlaceholder": "e.g. Client name",
+    "createButton": "Create",
+    "cancel": "Cancel",
+    "leave": "Leave this workspace",
+    "leaveTitle": "Leave {name}?",
+    "leaveDesc": "You'll lose access to this workspace until someone invites you again.",
+    "leaveConfirm": "Leave",
+    "switchFailed": "Couldn't switch workspace",
+    "createFailed": "Couldn't create the workspace",
+    "leaveFailed": "Couldn't leave the workspace"
   }
 }

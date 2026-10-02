@@ -26,10 +26,10 @@ export async function POST(request: Request) {
     const { supabase, accountId, userId } = await requireRole('agent')
     await requireFeature({ supabase, accountId }, 'ai')
 
-    const userLimit = checkRateLimit(`ai-draft:${userId}`, RATE_LIMITS.aiDraft)
+    const userLimit = await checkRateLimit(`ai-draft:${userId}`, RATE_LIMITS.aiDraft)
     if (!userLimit.success) return rateLimitResponse(userLimit)
     // Also cap the whole team's draws on the shared BYO provider key.
-    const accountLimit = checkRateLimit(
+    const accountLimit = await checkRateLimit(
       `ai-draft-acct:${accountId}`,
       RATE_LIMITS.aiDraftAccount,
     )

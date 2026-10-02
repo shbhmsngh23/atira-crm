@@ -1,22 +1,28 @@
 /**
- * In-memory per-key rate limiter.
+ * Per-key rate limiter.
  *
  * Fixed-window counter (not token bucket): every identifier gets a
- * fresh N-request budget each window. Simple, allocation-light, and
- * fine for a single-instance VPS — which is how forkers of this
- * template will usually deploy.
+ * fresh N-request budget each window.
  *
- * Trade-off: a single Node process holds the Map, so horizontal scale
- * (multiple regions, multiple Hostinger nodes, Vercel serverless fan-
- * out) silently defeats the limit. If you scale beyond one instance,
- * swap the `check` implementation for Redis / Upstash / Cloudflare
- * Durable Objects keeping the same return shape. The call sites won't
- * change.
+ * Two stores, same semantics:
  *
- * Memory: entries are ~50 bytes each. With LIGHT_SWEEP below, expired
- * keys get cleared opportunistically on every ~1 000th call, so a
- * healthy instance stays in the low-MB range even with thousands of
- * distinct users. No background timer — works in serverless edge
+ *   - Redis (Upstash REST API) when UPSTASH_REDIS_REST_URL and
+ *     UPSTASH_REDIS_REST_TOKEN are set (Vercel KV's KV_REST_API_URL /
+ *     KV_REST_API_TOKEN work too). Shared by every server instance, so
+ *     the limits hold when you run more than one — several containers,
+ *     serverless fan-out, several regions. Plain HTTPS, so it works in
+ *     any runtime and needs no client library.
+ *
+ *   - In-memory otherwise. One Map per Node process: correct for a
+ *     single server, silently per-instance beyond that.
+ *
+ * If Redis is configured but unreachable or slow, a check falls back
+ * to the in-memory store rather than failing the request: a limiter
+ * outage must not take the app down with it.
+ *
+ * Memory (in-memory store): entries are ~50 bytes each. With
+ * LIGHT_SWEEP below, expired keys get cleared opportunistically on
+ * every ~1 000th call. No background timer — works in serverless
  * runtimes that don't keep timers alive across requests.
  */
 
@@ -57,7 +63,7 @@ function sweepExpired(now: number) {
   }
 }
 
-export function checkRateLimit(
+function checkLocal(
   key: string,
   { limit, windowMs }: RateLimitOptions,
 ): RateLimitResult {
@@ -87,6 +93,99 @@ export function checkRateLimit(
     reset: entry.resetAt,
     limit,
   };
+}
+
+// ------------------------------------------------------------
+// Redis store (Upstash REST)
+// ------------------------------------------------------------
+
+/** Give up on Redis after this long and use the local store. */
+const REDIS_TIMEOUT_MS = 500;
+
+interface RedisConfig {
+  url: string;
+  token: string;
+}
+
+export function redisConfig(
+  env: Record<string, string | undefined> = process.env,
+): RedisConfig | null {
+  const url = env.UPSTASH_REDIS_REST_URL ?? env.KV_REST_API_URL;
+  const token = env.UPSTASH_REDIS_REST_TOKEN ?? env.KV_REST_API_TOKEN;
+  return url && token ? { url: url.replace(/\/+$/, ''), token } : null;
+}
+
+/**
+ * One round trip: INCR the key for the current window and set it to
+ * expire when the window ends. The window number is part of the key,
+ * so every instance agrees on when the window resets without a TTL
+ * read, and a key left behind by a failed PEXPIRE is simply never read
+ * again after its window.
+ */
+async function checkRedis(
+  config: RedisConfig,
+  key: string,
+  { limit, windowMs }: RateLimitOptions,
+  now: number,
+): Promise<RateLimitResult> {
+  const window = Math.floor(now / windowMs);
+  const reset = (window + 1) * windowMs;
+  const redisKey = `rl:${key}:${window}`;
+
+  const res = await fetch(`${config.url}/pipeline`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${config.token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify([
+      ['INCR', redisKey],
+      ['PEXPIRE', redisKey, String(reset - now + 1000)],
+    ]),
+    signal: AbortSignal.timeout(REDIS_TIMEOUT_MS),
+    cache: 'no-store',
+  });
+  if (!res.ok) throw new Error(`Redis responded ${res.status}`);
+
+  const [incr] = (await res.json()) as { result?: unknown; error?: string }[];
+  if (!incr || incr.error || typeof incr.result !== 'number') {
+    throw new Error(`Redis INCR failed: ${incr?.error ?? 'unexpected reply'}`);
+  }
+
+  const count = incr.result;
+  return {
+    success: count <= limit,
+    remaining: Math.max(0, limit - count),
+    reset,
+    limit,
+  };
+}
+
+let warnedRedisDown = 0;
+
+/**
+ * Count one request against `key`'s budget. Uses Redis when configured
+ * (shared across instances), the in-memory store otherwise or when
+ * Redis can't be reached.
+ */
+export async function checkRateLimit(
+  key: string,
+  options: RateLimitOptions,
+): Promise<RateLimitResult> {
+  const config = redisConfig();
+  if (config) {
+    const now = Date.now();
+    try {
+      return await checkRedis(config, key, options, now);
+    } catch (err) {
+      // Log at most once a minute: a Redis outage shouldn't flood logs.
+      if (now - warnedRedisDown > 60_000) {
+        warnedRedisDown = now;
+        console.error('[rate-limit] Redis unavailable, using in-memory limits:', err);
+      }
+    }
+  }
+  return checkLocal(key, options);
 }
 
 /**
@@ -145,9 +244,8 @@ export const RATE_LIMITS = {
   /** Public REST API (`/api/v1/*`), keyed per API key. 120/min ≈ 2
    *  req/s sustained — comfortable for a polling integration or an
    *  automation firing on inbound events, while bounding a runaway
-   *  script. Like every bucket here it's per-process; a multi-
-   *  instance deploy needs the Redis swap described at the top of
-   *  this file (the per-key call sites don't change). */
+   *  script. Shared across instances when Redis is configured (see
+   *  the top of this file), per-process otherwise. */
   publicApi: { limit: 120, windowMs: 60_000 },
   /** AI draft-reply generation, per user. 20/min is generous for an
    *  agent clicking "Draft with AI" while working a thread, and bounds
@@ -175,4 +273,5 @@ export const RATE_LIMITS = {
 export function __resetRateLimitForTests() {
   buckets.clear();
   callsSinceSweep = 0;
+  warnedRedisDown = 0;
 }

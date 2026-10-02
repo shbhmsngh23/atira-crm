@@ -92,10 +92,9 @@ export default function JoinPage() {
     undefined, // undefined = unknown / still loading; null = signed out
   );
   const [accepting, setAccepting] = useState(false);
-  // `redeem_invitation` returns 409 when the caller's current account
-  // has domain data, or they're already a member of a shared account.
-  // A transient toast wasn't enough — the user has no actionable next
-  // step. Surface a blocking modal that walks them through it.
+  // `redeem_invitation` returns 409 when the caller is already a member
+  // of this workspace. Surface a modal that says where to find it (the
+  // workspace switcher) rather than a transient toast.
   const [conflictMessage, setConflictMessage] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState(false);
 
@@ -165,11 +164,9 @@ export default function JoinPage() {
         const payload = (await res.json().catch(() => ({}))) as {
           error?: string;
         };
-        // 409 = caller already has data / is in another shared
-        // account. The redeem RPC's error message is descriptive
-        // enough to show directly; we open a modal so the user has
-        // a clear next-action (sign out → use different email)
-        // rather than a 3-second toast.
+        // 409 = caller is already a member of this workspace. The
+        // RPC's message is shown directly, in a modal with the next
+        // step rather than a 3-second toast.
         if (res.status === 409) {
           setConflictMessage(payload.error || t('conflictDefault'));
         } else {
@@ -341,7 +338,7 @@ export default function JoinPage() {
         </Card>
 
         {/* Conflict modal — opens when the redeem endpoint returns 409
-            (caller already in a shared account or has domain data).
+            (caller is already a member of this workspace).
             Blocks the flow until the user picks a recovery action so
             they aren't stuck retrying an inevitable failure. */}
         <Dialog

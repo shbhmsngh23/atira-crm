@@ -74,7 +74,7 @@ export async function POST(request: Request) {
     const ctx = await requireRole('admin');
     await requireFeature(ctx, 'api');
 
-    const limit = checkRateLimit(
+    const limit = await checkRateLimit(
       `admin:apiKeyCreate:${ctx.userId}`,
       RATE_LIMITS.adminAction
     );

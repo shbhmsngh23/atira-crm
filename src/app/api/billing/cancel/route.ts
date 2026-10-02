@@ -19,7 +19,7 @@ export async function POST() {
   try {
     const ctx = await requireRole('admin');
 
-    const limit = checkRateLimit(`admin:billingCancel:${ctx.userId}`, RATE_LIMITS.adminAction);
+    const limit = await checkRateLimit(`admin:billingCancel:${ctx.userId}`, RATE_LIMITS.adminAction);
     if (!limit.success) return rateLimitResponse(limit);
 
     const { subscription } = await loadBillingState(ctx.supabase, ctx.accountId);

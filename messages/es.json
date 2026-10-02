@@ -1967,7 +1967,7 @@
       "serverErrorTitle": "Algo salió mal",
       "serverErrorBody": "No pudimos verificar esta invitación en este momento. Intenta recargar la página en un momento."
     },
-    "conflictDefault": "Ya perteneces a otra cuenta. Inicia sesión con un correo distinto para unirte a esta.",
+    "conflictDefault": "Ya eres miembro de este espacio de trabajo.",
     "acceptFailed": "Error al aceptar la invitación",
     "welcome": "Bienvenido al equipo",
     "serverUnreachable": "No se pudo conectar con el servidor",
@@ -1980,9 +1980,9 @@
     "joinAs": "Te unirás como <badge>{role}</badge>. Enlace válido hasta {date}.",
     "accepting": "Aceptando…",
     "acceptInvitation": "Aceptar invitación",
-    "acceptNote": "Al aceptar, tu acceso pasa a {name}. La cuenta personal vacía que se creó al registrarte se eliminará.",
-    "conflictTitle": "No puedes unirte a {name} con esta cuenta",
-    "conflictBody": "Para unirte a <account>{name}</account>, cierra sesión y regístrate de nuevo con otra dirección de correo. El enlace de invitación sigue siendo válido mientras no haya expirado.",
+    "acceptNote": "Al aceptar, {name} se añade a tus espacios de trabajo y pasas a él. Puedes volver cuando quieras desde el menú de espacios de trabajo de la barra lateral.",
+    "conflictTitle": "Ya perteneces a {name}",
+    "conflictBody": "Cambia a <account>{name}</account> desde el menú de espacios de trabajo en la parte inferior de la barra lateral. Para unirte con otro acceso, cierra sesión y usa otro correo.",
     "staySignedIn": "Seguir con la sesión iniciada",
     "signingOut": "Cerrando sesión…",
     "signOutSwitch": "Cerrar sesión y usar otro correo",
@@ -2139,5 +2139,22 @@
     "suspendedTitle": "Este espacio de trabajo ha sido suspendido",
     "suspendedBody": "El envío de mensajes, las difusiones, las automatizaciones, los flujos de chatbot y las respuestas con IA están en pausa. Los mensajes entrantes de clientes se siguen guardando. Contacta con soporte para restaurar el acceso.",
     "choosePlan": "Elegir un plan"
+  },
+  "WorkspaceSwitcher": {
+    "label": "Espacios de trabajo",
+    "create": "Crear espacio de trabajo",
+    "createTitle": "Nuevo espacio de trabajo",
+    "createDesc": "Un espacio de trabajo independiente con su propio número de WhatsApp, contactos, equipo y plan, por ejemplo para un cliente que gestionas. Los espacios nuevos no incluyen prueba gratuita.",
+    "nameLabel": "Nombre del espacio de trabajo",
+    "namePlaceholder": "p. ej. Nombre del cliente",
+    "createButton": "Crear",
+    "cancel": "Cancelar",
+    "leave": "Salir de este espacio de trabajo",
+    "leaveTitle": "¿Salir de {name}?",
+    "leaveDesc": "Perderás el acceso a este espacio de trabajo hasta que alguien te vuelva a invitar.",
+    "leaveConfirm": "Salir",
+    "switchFailed": "No se pudo cambiar de espacio de trabajo",
+    "createFailed": "No se pudo crear el espacio de trabajo",
+    "leaveFailed": "No se pudo salir del espacio de trabajo"
   }
 }
