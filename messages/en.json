@@ -1580,6 +1580,14 @@
       "ownerHint": "Full control over account and billing"
     },
     "whatsapp": {
+      "embeddedTitle": "Connect with Facebook",
+      "embeddedDesc": "The quickest way: log in with Facebook, choose or create your WhatsApp Business Account and number, and Atira CRM connects it for you.",
+      "embeddedButton": "Connect WhatsApp",
+      "embeddedConnecting": "Connecting...",
+      "embeddedSuccess": "WhatsApp number connected",
+      "embeddedCancelled": "The signup was closed before it finished",
+      "embeddedFailed": "Couldn't connect the number",
+      "embeddedOr": "Or enter your API credentials by hand below.",
       "title": "WhatsApp connection",
       "description": "Connect your Meta WhatsApp Business API. Credentials, webhook, and setup steps all live here.",
       "tokenCorrupted": "Stored token can't be decrypted",

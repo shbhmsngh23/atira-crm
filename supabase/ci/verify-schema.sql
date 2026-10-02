@@ -122,6 +122,15 @@ BEGIN
     RAISE EXCEPTION 'sync_active_membership trigger is missing — migration 046 did not apply';
   END IF;
 
+  -- Embedded Signup (047).
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'whatsapp_config'
+      AND column_name = 'registration_pin'
+  ) THEN
+    RAISE EXCEPTION 'whatsapp_config.registration_pin is missing — migration 047 did not apply';
+  END IF;
+
   RAISE NOTICE 'schema verification passed';
 END
 $$;

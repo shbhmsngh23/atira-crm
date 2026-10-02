@@ -1570,6 +1570,14 @@
       "ownerHint": "Controle total da conta e do faturamento"
     },
     "whatsapp": {
+      "embeddedTitle": "Conectar com o Facebook",
+      "embeddedDesc": "O jeito mais rápido: entre com o Facebook, escolha ou crie sua conta do WhatsApp Business e seu número, e o Atira CRM faz a conexão para você.",
+      "embeddedButton": "Conectar WhatsApp",
+      "embeddedConnecting": "Conectando...",
+      "embeddedSuccess": "Número do WhatsApp conectado",
+      "embeddedCancelled": "O cadastro foi fechado antes de terminar",
+      "embeddedFailed": "Não foi possível conectar o número",
+      "embeddedOr": "Ou insira suas credenciais de API manualmente abaixo.",
       "title": "Conexão com o WhatsApp",
       "description": "Conecte sua API do WhatsApp Business da Meta. Credenciais, webhook e etapas de configuração ficam todos aqui.",
       "tokenCorrupted": "Não foi possível descriptografar o token armazenado",

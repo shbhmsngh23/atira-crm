@@ -1580,6 +1580,14 @@
       "ownerHint": "계정과 결제에 대한 전체 권한"
     },
     "whatsapp": {
+      "embeddedTitle": "Facebook으로 연결",
+      "embeddedDesc": "가장 빠른 방법입니다. Facebook으로 로그인하고 WhatsApp 비즈니스 계정과 번호를 선택하거나 만들면 Atira CRM이 연결해 드립니다.",
+      "embeddedButton": "WhatsApp 연결",
+      "embeddedConnecting": "연결 중...",
+      "embeddedSuccess": "WhatsApp 번호가 연결되었습니다",
+      "embeddedCancelled": "가입이 완료되기 전에 닫혔습니다",
+      "embeddedFailed": "번호를 연결하지 못했습니다",
+      "embeddedOr": "또는 아래에 API 자격 증명을 직접 입력하세요.",
       "title": "WhatsApp 연결",
       "description": "Meta WhatsApp 비즈니스 API를 연결하세요. 자격 증명, 웹훅, 설정 단계가 모두 여기 있습니다.",
       "tokenCorrupted": "저장된 토큰을 복호화할 수 없습니다",

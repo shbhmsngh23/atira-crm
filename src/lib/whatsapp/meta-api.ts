@@ -285,6 +285,62 @@ export async function listWabaPhoneNumbers(
   return out
 }
 
+// ============================================================
+// Embedded Signup (Tech Provider onboarding)
+// ============================================================
+
+/** Graph API version, for the browser SDK's FB.init. */
+export const GRAPH_API_VERSION = META_API_VERSION
+
+/**
+ * Exchange the code returned by Embedded Signup's FB.login for a
+ * business integration system user access token, which can manage the
+ * customer's WABA on this app's behalf.
+ */
+export async function exchangeSignupCode(args: {
+  appId: string
+  appSecret: string
+  code: string
+}): Promise<string> {
+  const url = new URL(`${META_API_BASE}/oauth/access_token`)
+  url.searchParams.set('client_id', args.appId)
+  url.searchParams.set('client_secret', args.appSecret)
+  url.searchParams.set('code', args.code)
+  const response = await fetch(url, { cache: 'no-store' })
+  if (!response.ok) {
+    await throwMetaError(response, `Meta code exchange failed: ${response.status}`)
+  }
+  const data = (await response.json()) as { access_token?: string }
+  if (!data.access_token) throw new Error('Meta returned no access token for the signup code.')
+  return data.access_token
+}
+
+export interface DebugTokenScope {
+  scope: string
+  target_ids?: string[]
+}
+
+/**
+ * The scopes (and the WABA ids they were granted on) of a token, read
+ * with the app's own token. Used when the signup popup didn't report
+ * which WABA the customer picked.
+ */
+export async function debugTokenScopes(args: {
+  appId: string
+  appSecret: string
+  inputToken: string
+}): Promise<DebugTokenScope[]> {
+  const url = new URL(`${META_API_BASE}/debug_token`)
+  url.searchParams.set('input_token', args.inputToken)
+  url.searchParams.set('access_token', `${args.appId}|${args.appSecret}`)
+  const response = await fetch(url, { cache: 'no-store' })
+  if (!response.ok) {
+    await throwMetaError(response, `Meta debug_token failed: ${response.status}`)
+  }
+  const data = (await response.json()) as { data?: { granular_scopes?: DebugTokenScope[] } }
+  return data.data?.granular_scopes ?? []
+}
+
 export interface GetSubscribedAppsArgs {
   wabaId: string
   accessToken: string
